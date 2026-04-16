@@ -1,6 +1,10 @@
-# Engram
+<p align="center">
+  <img src="logo.svg" width="180" alt="Engram logo">
+</p>
 
-High-recall conversational memory retrieval. Local-first, cloud-ready.
+<h1 align="center">Engram</h1>
+
+<p align="center">High-recall conversational memory retrieval. Local-first, cloud-ready.</p>
 
 **Target: 98%+ R@5 on LongMemEval — no LLM required.**
 
