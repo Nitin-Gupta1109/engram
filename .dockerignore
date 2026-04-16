@@ -1,0 +1,14 @@
+.venv/
+.git/
+.github/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+benchmarks/
+tests/
+engram_store/
+*.faiss
+*.egg-info/
+dist/
+build/

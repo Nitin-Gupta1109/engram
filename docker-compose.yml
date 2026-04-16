@@ -1,0 +1,35 @@
+services:
+  engram:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - engram_data:/data
+    environment:
+      - ENGRAM_BACKEND=faiss
+      - ENGRAM_STORE_PATH=/data/engram_store
+      - ENGRAM_EMBED_MODEL=bge-large
+
+  # Optional: Qdrant for cloud/enterprise mode
+  # Uncomment to use Qdrant instead of FAISS
+  # qdrant:
+  #   image: qdrant/qdrant:latest
+  #   ports:
+  #     - "6333:6333"
+  #   volumes:
+  #     - qdrant_data:/qdrant/storage
+
+  # engram-cloud:
+  #   build: .
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - ENGRAM_BACKEND=qdrant
+  #     - ENGRAM_QDRANT_URL=http://qdrant:6333
+  #     - ENGRAM_EMBED_MODEL=bge-large
+  #   depends_on:
+  #     - qdrant
+
+volumes:
+  engram_data:
+  # qdrant_data:
