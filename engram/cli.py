@@ -38,11 +38,21 @@ def cmd_ingest(args):
         print(f"Unsupported file format: {input_path.suffix}")
         sys.exit(1)
 
-    # Parse sessions
+    # Parse sessions — supports two formats:
+    # 1. List of {id, timestamp, turns} objects
+    # 2. List of turn-lists (raw format)
     all_docs = []
     if isinstance(data, list):
         for i, session in enumerate(data):
-            if isinstance(session, list):
+            if isinstance(session, dict) and "turns" in session:
+                parsed = session_to_documents(
+                    session=session["turns"],
+                    session_id=session.get("id", f"session_{i}"),
+                    timestamp=session.get("timestamp", ""),
+                    include_assistant=True,
+                )
+                all_docs.extend(parsed)
+            elif isinstance(session, list):
                 parsed = session_to_documents(
                     session=session,
                     session_id=f"session_{i}",
