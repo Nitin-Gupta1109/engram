@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "engram"
+version = "0.1.0"
+description = "High-recall conversational memory retrieval. Local-first, cloud-ready. 98%+ R@5 on LongMemEval."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [{ name = "Engram Team" }]
+
+dependencies = [
+    "sentence-transformers>=3.0",
+    "faiss-cpu>=1.7",
+    "rank-bm25>=0.2",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+cloud = [
+    "qdrant-client>=1.9",
+]
+rerank = [
+    "sentence-transformers>=3.0",
+]
+bench = [
+    "tqdm>=4.60",
+]
+dev = [
+    "engram[cloud,rerank,bench]",
+    "pytest>=7.0",
+    "ruff>=0.4",
+]
+all = ["engram[dev]"]
+
+[project.scripts]
+engram = "engram.cli:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

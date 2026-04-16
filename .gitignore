@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Engram
+engram_store/
+*.faiss
+engram_meta.db
+benchmarks/results_*.json
+/tmp/longmemeval_*.json
