@@ -108,6 +108,16 @@ uvicorn engram.server:app --host 0.0.0.0 --port 8000
 | `GET` | `/health` | Health check |
 | `GET` | `/stats` | Store statistics |
 
+## Examples
+
+Check out the interactive notebooks in [`examples/`](examples/):
+
+| Notebook | Description |
+|----------|-------------|
+| [Getting Started](examples/01_getting_started.ipynb) | Ingest conversations, search memories, understand hybrid retrieval |
+| [Customer Support](examples/02_customer_support.ipynb) | Build a support agent with full customer history recall |
+| [Personal Assistant](examples/03_personal_assistant.ipynb) | AI assistant with long-term memory across conversations |
+
 ## Docker
 
 ```bash
