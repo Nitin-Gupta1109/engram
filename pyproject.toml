@@ -41,18 +41,18 @@ bench = [
     "tqdm>=4.60",
 ]
 dev = [
-    "engram[cloud,rerank,bench]",
+    "engram-search[cloud,rerank,bench]",
     "pytest>=7.0",
     "ruff>=0.4",
 ]
-all = ["engram[dev]"]
+all = ["engram-search[dev]"]
 
 [project.scripts]
 engram = "engram.cli:main"
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py39"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
