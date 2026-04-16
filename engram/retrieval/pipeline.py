@@ -20,17 +20,84 @@ from ..backends.base import Document
 _QUOTED_RE = re.compile(r"""['"]([^'"]{3,60})['"]""")
 _NAME_RE = re.compile(r"\b[A-Z][a-z]{2,15}\b")
 
-NOT_NAMES = frozenset({
-    "What", "When", "Where", "Who", "How", "Which", "Did", "Do", "Was",
-    "Were", "Have", "Has", "Had", "Is", "Are", "The", "My", "Our", "Their",
-    "Can", "Could", "Would", "Should", "Will", "Shall", "May", "Might",
-    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
-    "January", "February", "March", "April", "June", "July", "August",
-    "September", "October", "November", "December", "In", "On", "At", "For",
-    "To", "Of", "With", "By", "From", "And", "But", "Also", "Just", "Very",
-    "More", "Previously", "Recently", "This", "That", "These", "Those",
-    "Not", "Now", "Then", "Here", "There", "Its", "Yes", "No",
-})
+NOT_NAMES = frozenset(
+    {
+        "What",
+        "When",
+        "Where",
+        "Who",
+        "How",
+        "Which",
+        "Did",
+        "Do",
+        "Was",
+        "Were",
+        "Have",
+        "Has",
+        "Had",
+        "Is",
+        "Are",
+        "The",
+        "My",
+        "Our",
+        "Their",
+        "Can",
+        "Could",
+        "Would",
+        "Should",
+        "Will",
+        "Shall",
+        "May",
+        "Might",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+        "January",
+        "February",
+        "March",
+        "April",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+        "In",
+        "On",
+        "At",
+        "For",
+        "To",
+        "Of",
+        "With",
+        "By",
+        "From",
+        "And",
+        "But",
+        "Also",
+        "Just",
+        "Very",
+        "More",
+        "Previously",
+        "Recently",
+        "This",
+        "That",
+        "These",
+        "Those",
+        "Not",
+        "Now",
+        "Then",
+        "Here",
+        "There",
+        "Its",
+        "Yes",
+        "No",
+    }
+)
 
 TIME_PATTERNS = [
     (r"(\d+)\s+days?\s+ago", lambda m: (int(m.group(1)), 2)),
@@ -140,12 +207,14 @@ class RetrievalPipeline:
     def _get_bm25(self):
         if self._bm25 is None:
             from .sparse import BM25
+
             self._bm25 = BM25()
         return self._bm25
 
     def _get_reranker(self):
         if self._reranker is None and self._use_reranker:
             from .reranker import CrossEncoderReranker
+
             self._reranker = CrossEncoderReranker()
         return self._reranker
 
@@ -173,15 +242,12 @@ class RetrievalPipeline:
         doc_texts = [d.text for d in documents]
         bm25_scores = bm25.score_query_against_docs(query, doc_texts)
         sparse_ranking = [
-            (documents[i].id, s) for i, s in sorted(
-                enumerate(bm25_scores), key=lambda x: x[1], reverse=True
-            )
+            (documents[i].id, s)
+            for i, s in sorted(enumerate(bm25_scores), key=lambda x: x[1], reverse=True)
         ]
 
         # Stage 2.5: Entity and temporal boost rankings
-        boost_rankings = self._compute_boost_rankings(
-            query, documents, question_date
-        )
+        boost_rankings = self._compute_boost_rankings(query, documents, question_date)
 
         # Stage 3: RRF fusion
         all_rankings = [dense_ranking, sparse_ranking] + boost_rankings
@@ -199,7 +265,7 @@ class RetrievalPipeline:
         # Stage 4: Cross-encoder reranking (over top candidates)
         reranker = self._get_reranker()
         if reranker and len(candidates) > 1:
-            rerank_pool = candidates[:min(20, len(candidates))]
+            rerank_pool = candidates[: min(20, len(candidates))]
             rerank_texts = [d.text for d in rerank_pool]
             reranked = reranker.rerank(query, rerank_texts, top_k=top_k)
             result = []
@@ -216,9 +282,7 @@ class RetrievalPipeline:
 
         return candidates[:top_k]
 
-    def _dense_rank(
-        self, query_vec, documents: List[Document]
-    ) -> List[Tuple[str, float]]:
+    def _dense_rank(self, query_vec, documents: List[Document]) -> List[Tuple[str, float]]:
         """Rank documents by cosine similarity to query vector."""
         import numpy as np
 

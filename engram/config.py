@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass, field
-from pathlib import Path
+from dataclasses import dataclass
 from typing import Optional
 
 
@@ -65,6 +64,7 @@ class EngramConfig:
 
         if self.backend == "qdrant":
             from .backends.qdrant_backend import QdrantBackend
+
             return QdrantBackend(
                 url=self.qdrant_url,
                 api_key=self.qdrant_api_key,
@@ -73,4 +73,5 @@ class EngramConfig:
             )
         else:
             from .backends.faiss_backend import FaissBackend
+
             return FaissBackend(path=self.store_path, dimension=dim)

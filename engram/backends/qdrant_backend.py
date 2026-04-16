@@ -25,9 +25,7 @@ class QdrantBackend(VectorBackend):
             from qdrant_client import QdrantClient
             from qdrant_client.models import Distance, VectorParams
         except ImportError:
-            raise ImportError(
-                "qdrant-client not installed. Run: pip install engram[cloud]"
-            )
+            raise ImportError("qdrant-client not installed. Run: pip install engram[cloud]")
 
         self._collection = collection_name
         self._dim = dimension
@@ -69,13 +67,12 @@ class QdrantBackend(VectorBackend):
         top_k: int = 10,
         metadata_filter: Optional[dict] = None,
     ) -> List[Document]:
-        from qdrant_client.models import Filter, FieldCondition, MatchValue
+        from qdrant_client.models import FieldCondition, Filter, MatchValue
 
         qfilter = None
         if metadata_filter:
             conditions = [
-                FieldCondition(key=k, match=MatchValue(value=v))
-                for k, v in metadata_filter.items()
+                FieldCondition(key=k, match=MatchValue(value=v)) for k, v in metadata_filter.items()
             ]
             qfilter = Filter(must=conditions)
 
@@ -103,13 +100,11 @@ class QdrantBackend(VectorBackend):
         return docs
 
     def delete(self, ids: List[str]) -> None:
-        from qdrant_client.models import Filter, FieldCondition, MatchAny
+        from qdrant_client.models import FieldCondition, Filter, MatchAny
 
         self._client.delete(
             collection_name=self._collection,
-            points_selector=Filter(
-                must=[FieldCondition(key="_doc_id", match=MatchAny(any=ids))]
-            ),
+            points_selector=Filter(must=[FieldCondition(key="_doc_id", match=MatchAny(any=ids))]),
         )
 
     def count(self) -> int:

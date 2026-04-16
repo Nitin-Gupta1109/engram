@@ -55,9 +55,7 @@ class FaissBackend(VectorBackend):
         # Load existing index from disk
         if self._index_path and self._index_path.exists():
             self._index = faiss.read_index(str(self._index_path))
-            rows = self._conn.execute(
-                "SELECT id FROM documents ORDER BY faiss_idx"
-            ).fetchall()
+            rows = self._conn.execute("SELECT id FROM documents ORDER BY faiss_idx").fetchall()
             self._id_map = [r[0] for r in rows]
 
     def add(self, docs: List[Document]) -> None:
@@ -82,10 +80,9 @@ class FaissBackend(VectorBackend):
         for i, doc in enumerate(docs):
             self._id_map.append(doc.id)
             meta_json = json.dumps(doc.metadata) if doc.metadata else None
-            self._conn.execute(
-                "INSERT OR REPLACE INTO documents (id, text, metadata, faiss_idx) VALUES (?, ?, ?, ?)",
-                (doc.id, doc.text, meta_json, start_idx + i),
-            )
+            sql = "INSERT OR REPLACE INTO documents"
+            sql += " (id, text, metadata, faiss_idx) VALUES (?, ?, ?, ?)"
+            self._conn.execute(sql, (doc.id, doc.text, meta_json, start_idx + i))
         self._conn.commit()
         self._save()
 
@@ -104,7 +101,10 @@ class FaissBackend(VectorBackend):
             vec = vec / norm
 
         # Over-fetch if filtering, then trim
-        fetch_k = min(top_k * 5, self._index.ntotal) if metadata_filter else min(top_k, self._index.ntotal)
+        if metadata_filter:
+            fetch_k = min(top_k * 5, self._index.ntotal)
+        else:
+            fetch_k = min(top_k, self._index.ntotal)
         scores, indices = self._index.search(vec, fetch_k)
 
         results = []

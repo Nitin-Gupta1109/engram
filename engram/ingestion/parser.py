@@ -8,7 +8,6 @@ Indexing strategy:
 """
 
 import re
-from typing import List
 
 # Preference patterns — detect how people express preferences in conversation.
 PREFERENCE_PATTERNS = [
@@ -40,7 +39,8 @@ PREFERENCE_PATTERNS = [
     # Ownership / possession patterns (catches "my photography setup", "my garden")
     r"my ([a-z][^,\.!?]{3,40})",
     # Activity patterns (catches "I grow tomatoes", "I bake cookies")
-    r"i (?:grow|bake|cook|make|build|play|practice|collect|photograph|paint|write|brew|craft|sew|knit) ([^,\.!?]{3,60})",
+    r"i (?:grow|bake|cook|make|build|play|practice|collect"
+    r"|photograph|paint|write|brew|craft|sew|knit) ([^,\.!?]{3,60})",
     r"i(?:'ve| have) (?:got|set up|installed|bought|built|started) (?:a |an |my )?([^,\.!?]{3,60})",
 ]
 
@@ -78,19 +78,61 @@ def extract_topics(turns: list) -> list:
     """Extract key topic nouns from user turns for vocabulary bridging."""
     topics = set()
     stop = {
-        "I", "My", "We", "You", "The", "This", "That", "It", "He", "She",
-        "They", "What", "How", "When", "Where", "Why", "Can", "Could",
-        "Would", "Should", "Will", "Do", "Does", "Did", "Have", "Has",
-        "Had", "Is", "Are", "Was", "Were", "Been", "Also", "Just",
-        "Very", "Really", "Actually", "Well", "Sure", "Yes", "No",
-        "Thanks", "Thank", "Please", "Hello", "Hi", "Hey",
+        "I",
+        "My",
+        "We",
+        "You",
+        "The",
+        "This",
+        "That",
+        "It",
+        "He",
+        "She",
+        "They",
+        "What",
+        "How",
+        "When",
+        "Where",
+        "Why",
+        "Can",
+        "Could",
+        "Would",
+        "Should",
+        "Will",
+        "Do",
+        "Does",
+        "Did",
+        "Have",
+        "Has",
+        "Had",
+        "Is",
+        "Are",
+        "Was",
+        "Were",
+        "Been",
+        "Also",
+        "Just",
+        "Very",
+        "Really",
+        "Actually",
+        "Well",
+        "Sure",
+        "Yes",
+        "No",
+        "Thanks",
+        "Thank",
+        "Please",
+        "Hello",
+        "Hi",
+        "Hey",
     }
     for turn in turns:
         if turn.get("role") != "user":
             continue
         text = turn["content"]
         # Extract "my X" possessive phrases
-        for match in re.findall(r"\bmy ([a-z][a-z ]{2,30}?)(?:[,\.!?\n]|\band\b|\bor\b)", text.lower()):
+        patt = r"\bmy ([a-z][a-z ]{2,30}?)(?:[,\.!?\n]|\band\b|\bor\b)"
+        for match in re.findall(patt, text.lower()):
             clean = match.strip()
             if len(clean) >= 3:
                 topics.add(clean)
@@ -105,13 +147,28 @@ def is_assistant_reference(question: str) -> bool:
     """Detect questions that ask about what the AI previously said."""
     q = question.lower()
     triggers = [
-        "you suggested", "you told me", "you mentioned", "you said",
-        "you recommended", "remind me what you", "you provided",
-        "you listed", "you gave me", "you described", "what did you",
-        "you came up with", "you helped me", "you explained",
-        "can you remind me", "you identified", "our previous conversation",
-        "our previous chat", "our last conversation", "follow up on our",
-        "going back to our", "looking back at our",
+        "you suggested",
+        "you told me",
+        "you mentioned",
+        "you said",
+        "you recommended",
+        "remind me what you",
+        "you provided",
+        "you listed",
+        "you gave me",
+        "you described",
+        "what did you",
+        "you came up with",
+        "you helped me",
+        "you explained",
+        "can you remind me",
+        "you identified",
+        "our previous conversation",
+        "our previous chat",
+        "our last conversation",
+        "follow up on our",
+        "going back to our",
+        "looking back at our",
     ]
     return any(t in q for t in triggers)
 
@@ -145,56 +202,64 @@ def session_to_documents(
         main_text = user_text
 
     if main_text.strip():
-        docs.append({
-            "id": session_id,
-            "text": main_text,
-            "metadata": {"session_id": session_id, "timestamp": timestamp, "type": "session"},
-            "is_synthetic": False,
-        })
+        docs.append(
+            {
+                "id": session_id,
+                "text": main_text,
+                "metadata": {"session_id": session_id, "timestamp": timestamp, "type": "session"},
+                "is_synthetic": False,
+            }
+        )
 
     # Assistant document: separate searchable doc with assistant turns
     if generate_assistant_doc and assistant_text.strip() and not include_assistant:
-        docs.append({
-            "id": f"{session_id}_asst",
-            "text": assistant_text,
-            "metadata": {
-                "session_id": session_id,
-                "timestamp": timestamp,
-                "type": "assistant",
-            },
-            "is_synthetic": True,
-        })
+        docs.append(
+            {
+                "id": f"{session_id}_asst",
+                "text": assistant_text,
+                "metadata": {
+                    "session_id": session_id,
+                    "timestamp": timestamp,
+                    "type": "assistant",
+                },
+                "is_synthetic": True,
+            }
+        )
 
     # Synthetic preference document
     if generate_preference_doc:
         prefs = extract_preferences(session)
         if prefs:
             pref_text = "User has mentioned: " + "; ".join(prefs)
-            docs.append({
-                "id": f"{session_id}_pref",
-                "text": pref_text,
-                "metadata": {
-                    "session_id": session_id,
-                    "timestamp": timestamp,
-                    "type": "preference",
-                },
-                "is_synthetic": True,
-            })
+            docs.append(
+                {
+                    "id": f"{session_id}_pref",
+                    "text": pref_text,
+                    "metadata": {
+                        "session_id": session_id,
+                        "timestamp": timestamp,
+                        "type": "preference",
+                    },
+                    "is_synthetic": True,
+                }
+            )
 
     # Synthetic topic document for vocabulary bridging
     if generate_topic_doc:
         topics = extract_topics(session)
         if topics:
             topic_text = "Topics discussed: " + ", ".join(topics)
-            docs.append({
-                "id": f"{session_id}_topic",
-                "text": topic_text,
-                "metadata": {
-                    "session_id": session_id,
-                    "timestamp": timestamp,
-                    "type": "topic",
-                },
-                "is_synthetic": True,
-            })
+            docs.append(
+                {
+                    "id": f"{session_id}_topic",
+                    "text": topic_text,
+                    "metadata": {
+                        "session_id": session_id,
+                        "timestamp": timestamp,
+                        "type": "topic",
+                    },
+                    "is_synthetic": True,
+                }
+            )
 
     return docs

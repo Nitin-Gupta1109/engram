@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from functools import lru_cache
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional
 
 import numpy as np
-
 
 # Model registry: name -> (HuggingFace ID, dimension)
 MODELS = {

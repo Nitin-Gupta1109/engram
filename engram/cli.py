@@ -15,16 +15,16 @@ def cmd_init(args):
     path = Path(args.path).resolve()
     backend = FaissBackend(path=path, dimension=1024)
     print(f"Initialized Engram store at {path}")
-    print(f"  Backend: FAISS (local)")
+    print("  Backend: FAISS (local)")
     print(f"  Documents: {backend.count()}")
 
 
 def cmd_ingest(args):
     """Ingest conversation files into the memory store."""
-    from .backends.faiss_backend import FaissBackend
     from .backends.base import Document
-    from .retrieval.embedder import Embedder
+    from .backends.faiss_backend import FaissBackend
     from .ingestion.parser import session_to_documents
+    from .retrieval.embedder import Embedder
 
     store_path = Path(args.store).resolve()
     backend = FaissBackend(path=store_path, dimension=1024)
@@ -62,12 +62,14 @@ def cmd_ingest(args):
     # Store
     documents = []
     for i, doc_info in enumerate(all_docs):
-        documents.append(Document(
-            id=doc_info["id"],
-            text=doc_info["text"],
-            embedding=embeddings[i].tolist(),
-            metadata=doc_info["metadata"],
-        ))
+        documents.append(
+            Document(
+                id=doc_info["id"],
+                text=doc_info["text"],
+                embedding=embeddings[i].tolist(),
+                metadata=doc_info["metadata"],
+            )
+        )
 
     backend.add(documents)
     print(f"Ingested {len(documents)} documents. Total: {backend.count()}")
@@ -76,9 +78,7 @@ def cmd_ingest(args):
 def cmd_search(args):
     """Search the memory store."""
     from .backends.faiss_backend import FaissBackend
-    from .backends.base import Document
     from .retrieval.embedder import Embedder
-    from .retrieval.pipeline import RetrievalPipeline
 
     store_path = Path(args.store).resolve()
     backend = FaissBackend(path=store_path)
@@ -111,7 +111,7 @@ def cmd_info(args):
     backend = FaissBackend(path=store_path)
     print(f"Engram store: {store_path}")
     print(f"  Documents: {backend.count()}")
-    print(f"  Backend: FAISS (local)")
+    print("  Backend: FAISS (local)")
 
 
 def main():

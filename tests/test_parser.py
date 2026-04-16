@@ -1,6 +1,5 @@
 """Tests for session parsing and document preparation."""
 
-import pytest
 from engram.ingestion.parser import (
     extract_preferences,
     extract_topics,
@@ -164,7 +163,8 @@ class TestSessionToDocuments:
     def test_disable_synthetic_docs(self):
         session = self._make_session()
         docs = session_to_documents(
-            session, "sess1",
+            session,
+            "sess1",
             generate_preference_doc=False,
             generate_assistant_doc=False,
             generate_topic_doc=False,

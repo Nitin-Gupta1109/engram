@@ -1,9 +1,10 @@
 """Tests for FAISS + SQLite backend."""
 
-import pytest
 import numpy as np
-from engram.backends.faiss_backend import FaissBackend
+import pytest
+
 from engram.backends.base import Document
+from engram.backends.faiss_backend import FaissBackend
 
 
 def _make_doc(doc_id: str, text: str, dim: int = 8) -> Document:
@@ -51,10 +52,12 @@ class TestFaissBackend:
         similar = similar / np.linalg.norm(similar)
         dissimilar = np.array([0, 0, 0, 0, 0, 0, 0, 1], dtype=np.float32)
 
-        backend.add([
-            Document(id="similar", text="similar", embedding=similar.tolist()),
-            Document(id="dissimilar", text="dissimilar", embedding=dissimilar.tolist()),
-        ])
+        backend.add(
+            [
+                Document(id="similar", text="similar", embedding=similar.tolist()),
+                Document(id="dissimilar", text="dissimilar", embedding=dissimilar.tolist()),
+            ]
+        )
 
         results = backend.query(target.tolist(), top_k=2)
         assert results[0].id == "similar"
@@ -65,10 +68,14 @@ class TestFaissBackend:
         vec = np.random.randn(8).astype(np.float32)
         vec = vec / np.linalg.norm(vec)
 
-        backend.add([
-            Document(id="d1", text="a", embedding=vec.tolist(), metadata={"type": "session"}),
-            Document(id="d2", text="b", embedding=vec.tolist(), metadata={"type": "preference"}),
-        ])
+        backend.add(
+            [
+                Document(id="d1", text="a", embedding=vec.tolist(), metadata={"type": "session"}),
+                Document(
+                    id="d2", text="b", embedding=vec.tolist(), metadata={"type": "preference"}
+                ),
+            ]
+        )
 
         results = backend.query(vec.tolist(), top_k=10, metadata_filter={"type": "session"})
         assert len(results) == 1

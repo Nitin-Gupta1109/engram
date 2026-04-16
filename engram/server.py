@@ -14,10 +14,8 @@ Runs with any ASGI server: uvicorn engram.server:app
 
 from __future__ import annotations
 
-import json
-import os
 import logging
-from dataclasses import asdict
+import os
 from typing import List, Optional
 
 logger = logging.getLogger("engram.server")
@@ -32,13 +30,10 @@ def _create_app():
         from fastapi import FastAPI, HTTPException
         from pydantic import BaseModel
     except ImportError:
-        raise ImportError(
-            "FastAPI not installed. Run: pip install fastapi uvicorn"
-        )
+        raise ImportError("FastAPI not installed. Run: pip install fastapi uvicorn")
 
     from .backends.base import Document
     from .retrieval.embedder import Embedder
-    from .retrieval.pipeline import RetrievalPipeline
 
     app = FastAPI(
         title="Engram",
@@ -56,15 +51,16 @@ def _create_app():
     # --- Initialize backend ---
     if BACKEND_TYPE == "qdrant":
         from .backends.qdrant_backend import QdrantBackend
+
         backend = QdrantBackend(url=QDRANT_URL, api_key=QDRANT_API_KEY)
         logger.info("Using Qdrant backend at %s", QDRANT_URL)
     else:
         from .backends.faiss_backend import FaissBackend
+
         backend = FaissBackend(path=STORE_PATH)
         logger.info("Using FAISS backend at %s", STORE_PATH)
 
     embedder = Embedder(EMBED_MODEL)
-    pipeline = RetrievalPipeline(embedder=embedder, use_reranker=False)
 
     # --- Models ---
     class IngestRequest(BaseModel):
@@ -120,12 +116,14 @@ def _create_app():
 
         documents = []
         for i, doc_info in enumerate(all_docs):
-            documents.append(Document(
-                id=doc_info["id"],
-                text=doc_info["text"],
-                embedding=embeddings[i].tolist(),
-                metadata=doc_info["metadata"],
-            ))
+            documents.append(
+                Document(
+                    id=doc_info["id"],
+                    text=doc_info["text"],
+                    embedding=embeddings[i].tolist(),
+                    metadata=doc_info["metadata"],
+                )
+            )
 
         backend.add(documents)
         return {"ingested": len(documents), "total": backend.count()}
@@ -148,6 +146,7 @@ def _create_app():
 
         # BM25 rerank
         from .retrieval.sparse import BM25
+
         bm25 = BM25()
         doc_texts = [c.text for c in candidates]
         bm25_scores = bm25.score_query_against_docs(req.query, doc_texts)
@@ -158,7 +157,7 @@ def _create_app():
             candidate.score = 0.6 * candidate.score + 0.4 * (bm25_scores[i] / max_bm25)
 
         candidates.sort(key=lambda d: d.score, reverse=True)
-        top = candidates[:req.top_k]
+        top = candidates[: req.top_k]
 
         return {
             "query": req.query,

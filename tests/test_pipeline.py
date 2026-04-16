@@ -1,11 +1,10 @@
 """Tests for retrieval pipeline utilities (no model loading required)."""
 
-import pytest
 from engram.retrieval.pipeline import (
     extract_person_names,
     extract_quoted_phrases,
-    parse_temporal_offset,
     parse_date,
+    parse_temporal_offset,
     reciprocal_rank_fusion,
 )
 

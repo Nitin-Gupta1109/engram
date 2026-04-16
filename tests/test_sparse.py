@@ -1,7 +1,6 @@
 """Tests for BM25 sparse retrieval."""
 
-import pytest
-from engram.retrieval.sparse import BM25, tokenize, STOP_WORDS
+from engram.retrieval.sparse import BM25, tokenize
 
 
 class TestTokenize:
