@@ -50,6 +50,9 @@ all = ["engram-search[dev]"]
 [project.scripts]
 engram = "engram.cli:main"
 
+[tool.hatch.build.targets.wheel]
+packages = ["engram"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py39"
