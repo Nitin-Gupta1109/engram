@@ -41,7 +41,10 @@ class FaissBackend(VectorBackend):
         self._id_map: list[str] = []  # positional: faiss row i -> doc id
 
         # SQLite for metadata + text
-        self._conn = sqlite3.connect(str(self._db_path) if self._db_path else ":memory:")
+        self._conn = sqlite3.connect(
+            str(self._db_path) if self._db_path else ":memory:",
+            check_same_thread=False,
+        )
         self._conn.execute("""
             CREATE TABLE IF NOT EXISTS documents (
                 id TEXT PRIMARY KEY,
@@ -91,6 +94,7 @@ class FaissBackend(VectorBackend):
         embedding: List[float],
         top_k: int = 10,
         metadata_filter: Optional[dict] = None,
+        min_score: float = 0.0,
     ) -> List[Document]:
         if self._index.ntotal == 0:
             return []
@@ -110,6 +114,8 @@ class FaissBackend(VectorBackend):
         results = []
         for score, idx in zip(scores[0], indices[0]):
             if idx < 0 or idx >= len(self._id_map):
+                continue
+            if float(score) < min_score:
                 continue
             doc_id = self._id_map[idx]
             row = self._conn.execute(

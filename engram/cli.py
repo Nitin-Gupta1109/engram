@@ -95,10 +95,14 @@ def cmd_search(args):
     embedder = Embedder(args.embed_model)
 
     query_vec = embedder.encode_query(args.query)
-    results = backend.query(embedding=query_vec.tolist(), top_k=args.top_k)
+    results = backend.query(
+        embedding=query_vec.tolist(),
+        top_k=args.top_k,
+        min_score=args.min_score,
+    )
 
     if not results:
-        print(f'No results for: "{args.query}"')
+        print(f'No relevant results for: "{args.query}"')
         return
 
     print(f'\nResults for: "{args.query}"\n{"=" * 60}')
@@ -148,6 +152,12 @@ def main():
     p_search.add_argument("--store", default="./engram_store", help="Store path")
     p_search.add_argument("--embed-model", default="bge-large", help="Embedding model")
     p_search.add_argument("--top-k", type=int, default=5, help="Number of results")
+    p_search.add_argument(
+        "--min-score",
+        type=float,
+        default=0.45,
+        help="Minimum similarity score (0.0-1.0, default: 0.45)",
+    )
 
     # info
     p_info = sub.add_parser("info", help="Show store info")

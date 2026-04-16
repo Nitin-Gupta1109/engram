@@ -38,8 +38,15 @@ class VectorBackend(ABC):
         embedding: list[float],
         top_k: int = 10,
         metadata_filter: Optional[dict] = None,
+        min_score: float = 0.0,
     ) -> list[Document]:
-        """Return top-k nearest documents by cosine similarity."""
+        """Return top-k nearest documents by cosine similarity.
+
+        Args:
+            min_score: Minimum similarity score threshold (0.0 to 1.0).
+                Documents below this score are excluded. Default 0.0 (no filtering).
+                Recommended: 0.3 for loose matching, 0.5 for strict relevance.
+        """
 
     @abstractmethod
     def delete(self, ids: list[str]) -> None:

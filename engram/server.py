@@ -70,6 +70,7 @@ def _create_app():
     class SearchRequest(BaseModel):
         query: str
         top_k: int = 5
+        min_score: float = 0.45
         question_date: Optional[str] = None
 
     class SearchResult(BaseModel):
@@ -139,6 +140,7 @@ def _create_app():
         candidates = backend.query(
             embedding=query_vec.tolist(),
             top_k=req.top_k * 3,
+            min_score=req.min_score,
         )
 
         if not candidates:
