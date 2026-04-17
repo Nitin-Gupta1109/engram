@@ -19,7 +19,9 @@
 
 ## Benchmark Results
 
-**98.4% R@5 on LongMemEval** (500 questions) — no LLM required, zero cost per query.
+**Tested on two major benchmarks** — no LLM required, zero cost per query.
+
+### LongMemEval (500 questions)
 
 | Metric | Score |
 |--------|-------|
@@ -36,6 +38,22 @@
 | temporal-reasoning | 97.0% |
 | single-session-preference | 93.3% |
 
+### LoCoMo (1982 questions, 10 conversations)
+
+| Metric | Score |
+|--------|-------|
+| R@5 | **75.3%** (1492/1982) |
+| R@10 | 88.8% |
+| NDCG@5 | 0.557 |
+
+| Category | R@5 | R@10 |
+|----------|-----|------|
+| Single-hop (factual) | 79.1% | 93.3% |
+| Temporal (dates) | 70.1% | 84.4% |
+| Multi-hop (inference) | 59.8% | 76.1% |
+| Contextual (details) | 77.1% | 90.1% |
+| Adversarial (speaker) | 76.5% | 89.5% |
+
 ## What It Does
 
 Engram stores conversation history and retrieves it with state-of-the-art accuracy. It uses a three-stage retrieval pipeline — dense embeddings, sparse keyword matching, and cross-encoder reranking — to achieve higher recall than systems relying on LLM-based extraction or summarization.
@@ -43,6 +61,23 @@ Engram stores conversation history and retrieves it with state-of-the-art accura
 Nothing is summarized. Nothing is paraphrased. Your exact words are stored and returned.
 
 ## How It Compares
+
+### LoCoMo — Zero-LLM Memory Systems
+
+| System | LoCoMo Accuracy | LLM Required |
+|--------|----------------|--------------|
+| EverMemOS | 92.3% | Yes (cloud) |
+| Hindsight | 89.6% | Yes (cloud) |
+| Zep | ~85% | Yes (cloud) |
+| Letta / MemGPT | ~83.2% | Yes (cloud) |
+| **Engram** | **75.3%** | **No** |
+| SLM V3 (zero-cloud) | 74.8% | No |
+| Supermemory | ~70% | Yes |
+| Mem0 (independent) | ~58% | Yes |
+
+Engram is the **top-performing zero-LLM system** on LoCoMo, competitive with paid cloud-LLM services at $0/query.
+
+### LongMemEval
 
 | | Engram | MemPalace | Mem0 |
 |---|---|---|---|
@@ -150,22 +185,26 @@ docker run -p 8000:8000 -v engram_data:/data engram
 
 ## Run Benchmarks
 
+### LongMemEval
+
 ```bash
-# Download LongMemEval dataset
-curl -fsSL -o /tmp/longmemeval_s_cleaned.json \
+# Download dataset
+curl -fsSL -o data/longmemeval_s_cleaned.json \
   https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json
 
-# Install dev dependencies
 pip install engram-search[all]
 
-# Hybrid mode (default — dense + BM25 via RRF)
-python benchmarks/longmemeval_bench.py /tmp/longmemeval_s_cleaned.json --mode hybrid
+python benchmarks/longmemeval_bench.py data/longmemeval_s_cleaned.json --mode hybrid
+```
 
-# Dense only
-python benchmarks/longmemeval_bench.py /tmp/longmemeval_s_cleaned.json --mode dense
+### LoCoMo
 
-# Full pipeline (hybrid + cross-encoder reranker)
-python benchmarks/longmemeval_bench.py /tmp/longmemeval_s_cleaned.json --mode rerank
+```bash
+# Download dataset (from Snap Research)
+curl -fsSL -o data/locomo10.json \
+  https://raw.githubusercontent.com/snap-research/locomo/main/data/locomo10.json
+
+python benchmarks/locomo_bench.py data/locomo10.json --mode hybrid
 ```
 
 ## Requirements

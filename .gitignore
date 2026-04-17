@@ -212,3 +212,4 @@ engram_store/
 engram_meta.db
 benchmarks/results_*.json
 /tmp/longmemeval_*.json
+data/

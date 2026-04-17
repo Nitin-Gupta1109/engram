@@ -103,17 +103,26 @@ def search(query, top_k=5, use_hybrid=True, min_score=0.0):
         embedding=query_vec.tolist(), top_k=top_k * 3, min_score=min_score
     )
 
+    if not dense_results:
+        return []
+
     if not use_hybrid or not documents:
         return dense_results[:top_k]
 
-    # Hybrid: dense + BM25 + RRF
+    # Hybrid: dense + BM25 + RRF (only over docs that passed min_score)
+    passed_ids = {d.id for d in dense_results}
     dense_ranking = [(d.id, d.score) for d in dense_results]
 
     bm25 = BM25()
     all_texts = [d.text for d in documents]
     all_ids = [d.id for d in documents]
     bm25_scores = bm25.score_query_against_docs(query, all_texts)
-    sparse_ranking = sorted(zip(all_ids, bm25_scores), key=lambda x: x[1], reverse=True)
+    # Only include BM25 results for docs that passed the dense min_score filter
+    sparse_ranking = [
+        (did, score)
+        for did, score in sorted(zip(all_ids, bm25_scores), key=lambda x: x[1], reverse=True)
+        if did in passed_ids
+    ]
 
     fused = reciprocal_rank_fusion(dense_ranking, sparse_ranking)
 
