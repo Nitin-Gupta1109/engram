@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "engram-search"
-version = "0.1.0"
-description = "High-recall conversational memory retrieval. Local-first, cloud-ready. 98%+ R@5 on LongMemEval."
+version = "0.1.1"
+description = "High-recall conversational memory retrieval. 98% R@5 on LongMemEval, 75% on LoCoMo — no LLM required. Local-first, cloud-ready."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
 authors = [{ name = "Nitin Gupta", email = "nmittal1109@gmail.com" }]
-keywords = ["memory", "retrieval", "conversational-ai", "embeddings", "bm25", "faiss"]
+keywords = ["memory", "retrieval", "conversational-ai", "embeddings", "bm25", "faiss", "rag", "search", "semantic-search", "long-term-memory"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -21,6 +21,8 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Indexing",
+    "Topic :: Text Processing :: Linguistic",
 ]
 
 dependencies = [

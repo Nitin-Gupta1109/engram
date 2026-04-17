@@ -108,7 +108,7 @@ pip install engram-search[rerank]
 pip install engram-search[all]
 ```
 
-## Quickstart — Local Mode
+## Quickstart — CLI
 
 ```bash
 # Initialize a memory store
@@ -119,6 +119,42 @@ engram ingest conversations.json --store ./my_memories
 
 # Search
 engram search "why did we switch to GraphQL" --store ./my_memories
+```
+
+## Quickstart — Python API
+
+```python
+from engram.backends.faiss_backend import FaissBackend
+from engram.backends.base import Document
+from engram.ingestion.parser import session_to_documents
+from engram.retrieval.embedder import Embedder
+from engram.retrieval.pipeline import RetrievalPipeline
+
+# Initialize
+embedder = Embedder("bge-large")
+backend = FaissBackend(path="./my_memories", dimension=1024)
+pipeline = RetrievalPipeline(embedder=embedder)
+
+# Ingest a conversation
+turns = [
+    {"role": "user", "content": "I'm switching our API from REST to GraphQL."},
+    {"role": "assistant", "content": "What's driving the switch?"},
+    {"role": "user", "content": "Too many round trips. Our mobile app makes 12 calls per screen."},
+]
+docs = session_to_documents(turns, session_id="session_1", timestamp="2025-01-15")
+texts = [d["text"] for d in docs]
+embeddings = embedder.encode_documents(texts)
+
+documents = [
+    Document(id=d["id"], text=d["text"], embedding=e.tolist(), metadata=d["metadata"])
+    for d, e in zip(docs, embeddings)
+]
+backend.add(documents)
+
+# Search
+results = pipeline.search("why did we switch to GraphQL", documents=documents, top_k=3)
+for r in results:
+    print(r.text)
 ```
 
 ## Quickstart — Cloud Mode
