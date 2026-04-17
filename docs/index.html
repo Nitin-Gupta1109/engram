@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Engram — High-recall conversational memory retrieval</title>
+  <meta
+    name="description"
+    content="State-of-the-art conversational memory retrieval. 93.9% R@5 on LoCoMo, 98.4% on LongMemEval — no LLM required. Local-first, cloud-ready. pip install engram-search."
+  />
+
+  <meta property="og:title" content="Engram — High-recall conversational memory retrieval" />
+  <meta
+    property="og:description"
+    content="93.9% R@5 on LoCoMo. Zero LLM calls. $0/query. pip install engram-search."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://engram-search.com" />
+  <meta property="og:image" content="https://engram-search.com/social-preview.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Engram — High-recall conversational memory retrieval" />
+  <meta
+    name="twitter:description"
+    content="93.9% R@5 on LoCoMo. Zero LLM calls. $0/query. pip install engram-search."
+  />
+  <meta name="twitter:image" content="https://engram-search.com/social-preview.png" />
+
+  <link rel="icon" type="image/svg+xml" href="logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "system-ui", "sans-serif"],
+            mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root {
+      --bg: #08080C;
+      --bg-elev: #0F0F1A;
+      --border: rgba(139, 92, 246, 0.15);
+      --border-bright: rgba(139, 92, 246, 0.35);
+      --text: #E5E7EB;
+      --text-muted: #9CA3AF;
+      --text-dim: #6B7280;
+      --purple: #8B5CF6;
+      --purple-light: #A78BFA;
+      --cyan: #22D3EE;
+      --cyan-light: #67E8F9;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #C4B5FD 0%, #67E8F9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: -300px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1100px;
+      height: 1100px;
+      background: radial-gradient(
+        circle at center,
+        rgba(124, 58, 237, 0.22) 0%,
+        rgba(34, 211, 238, 0.08) 35%,
+        transparent 65%
+      );
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(40px);
+    }
+
+    .grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+          rgba(139, 92, 246, 0.04) 1px,
+          transparent 1px
+        ),
+        linear-gradient(90deg, rgba(139, 92, 246, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(circle at 50% 40%, black 0%, transparent 70%);
+      -webkit-mask-image: radial-gradient(circle at 50% 40%, black 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .card {
+      background: linear-gradient(
+        180deg,
+        rgba(31, 27, 46, 0.5) 0%,
+        rgba(15, 15, 26, 0.3) 100%
+      );
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: border-color 200ms ease, transform 200ms ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-bright);
+    }
+
+    .code-block {
+      background: #0B0B14;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 13.5px;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      padding: 20px 24px;
+      white-space: pre;
+    }
+
+    .tok-comment { color: #6B7280; }
+    .tok-kw { color: #C084FC; }
+    .tok-str { color: #86EFAC; }
+    .tok-fn { color: #67E8F9; }
+    .tok-num { color: #FBBF24; }
+    .tok-var { color: #F9A8D4; }
+    .tok-op { color: #E5E7EB; }
+    .tok-prompt { color: #8B5CF6; user-select: none; }
+    .tok-flag { color: #FBBF24; }
+
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      color: #C4B5FD;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14.5px;
+      transition: all 200ms ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #7C3AED 0%, #0EA5E9 100%);
+      color: white;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 10px 30px -12px rgba(124, 58, 237, 0.6);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 18px 40px -14px rgba(124, 58, 237, 0.75);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .install-block {
+      position: relative;
+      background: #0B0B14;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px 14px 18px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 14.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .install-block button {
+      margin-left: auto;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #C4B5FD;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .install-block button:hover {
+      background: rgba(139, 92, 246, 0.25);
+    }
+
+    .big-metric {
+      font-size: 72px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    @media (max-width: 640px) {
+      .big-metric {
+        font-size: 56px;
+      }
+    }
+
+    .bench-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .bench-table th,
+    .bench-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+      font-size: 14.5px;
+    }
+
+    .bench-table th {
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .bench-table tr.highlight {
+      background: linear-gradient(
+        90deg,
+        rgba(124, 58, 237, 0.12) 0%,
+        rgba(6, 182, 212, 0.06) 100%
+      );
+    }
+
+    .bench-table tr.highlight td {
+      color: white;
+      font-weight: 600;
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .pipeline {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .pipeline {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pipeline-step {
+      padding: 20px;
+      position: relative;
+    }
+
+    .pipeline-step .num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #C4B5FD;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .feature-card h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: white;
+    }
+
+    .feature-card .icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #C4B5FD;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-radius: 8px 8px 0 0;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color 150ms ease;
+      background: transparent;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: inherit;
+    }
+
+    .tab-btn.active {
+      color: #C4B5FD;
+      border-bottom-color: #8B5CF6;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      font-size: 14px;
+      transition: color 150ms ease;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+    }
+
+    section {
+      position: relative;
+    }
+
+    .divider-glow {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(139, 92, 246, 0.25),
+        transparent
+      );
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAV -->
+  <nav class="relative z-20 max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5">
+      <img src="logo.svg" alt="" width="32" height="32" />
+      <span class="font-semibold text-[17px] tracking-tight text-white">Engram</span>
+    </a>
+    <div class="flex items-center gap-6">
+      <a href="#benchmarks" class="nav-link hidden sm:inline">Benchmarks</a>
+      <a href="#how" class="nav-link hidden sm:inline">How it works</a>
+      <a href="#quickstart" class="nav-link hidden sm:inline">Quickstart</a>
+      <a
+        href="https://github.com/Nitin-Gupta1109/engram"
+        target="_blank"
+        rel="noopener"
+        class="btn btn-secondary text-[13.5px] py-2 px-3"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.32-1.28-1.67-1.28-1.67-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.95.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.51-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.18-1.18 3.18-1.18.62 1.59.23 2.77.11 3.06.74.8 1.19 1.83 1.19 3.09 0 4.42-2.7 5.39-5.27 5.68.41.35.78 1.04.78 2.1v3.11c0 .31.21.67.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/>
+        </svg>
+        GitHub
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="relative overflow-hidden pt-16 pb-24">
+    <div class="hero-glow"></div>
+    <div class="grid-bg"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-6 text-center">
+      <div class="tag-pill mb-8">
+        <span class="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
+        #1 on LoCoMo benchmark — zero LLM required
+      </div>
+
+      <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter leading-[1.05] mb-6">
+        Conversational memory<br />
+        that actually <span class="gradient-text">remembers.</span>
+      </h1>
+
+      <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+        State-of-the-art retrieval over past conversations — 93.9% R@5 on LoCoMo, 98.4% on LongMemEval. No LLM calls. $0 per query. Your words, stored exactly as you said them.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
+        <div class="install-block min-w-[320px]">
+          <span class="tok-prompt">$</span>
+          <span><span class="tok-fn">pip install</span> engram-search</span>
+          <button onclick="copyInstall(this)">Copy</button>
+        </div>
+        <a
+          href="https://github.com/Nitin-Gupta1109/engram"
+          target="_blank"
+          rel="noopener"
+          class="btn btn-primary"
+        >
+          View on GitHub
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+        </a>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-gray-500">
+        <div class="flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          MIT licensed
+        </div>
+        <div class="flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Local-first, cloud-ready
+        </div>
+        <div class="flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Python 3.9+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENCHMARKS -->
+  <section id="benchmarks" class="relative py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-14">
+        <div class="tag-pill mb-4">Benchmarks</div>
+        <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
+          Independently verified on two benchmarks.
+        </h2>
+        <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+          Tested on the two widely-used conversational memory benchmarks. No LLM in the loop — just embeddings, sparse retrieval, and a free cross-encoder reranker.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-14">
+        <!-- LoCoMo card -->
+        <div class="card p-8">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-semibold text-white">LoCoMo</h3>
+            <span class="text-xs text-gray-500 font-mono">1,982 questions · 10 conversations</span>
+          </div>
+
+          <div class="big-metric gradient-text mb-2">93.9%</div>
+          <div class="text-gray-400 mb-6">R@5 — top result on the benchmark</div>
+
+          <div class="space-y-2.5 text-[14.5px]">
+            <div class="flex justify-between"><span class="text-gray-400">R@10</span><span class="font-semibold">95.0%</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">NDCG@5</span><span class="font-semibold">0.894</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Single-hop</span><span class="font-semibold">90.4%</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Temporal</span><span class="font-semibold">93.1%</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Contextual</span><span class="font-semibold">97.1%</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Adversarial</span><span class="font-semibold">94.6%</span></div>
+          </div>
+        </div>
+
+        <!-- LongMemEval card -->
+        <div class="card p-8">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-semibold text-white">LongMemEval</h3>
+            <span class="text-xs text-gray-500 font-mono">500 questions</span>
+          </div>
+
+          <div class="big-metric gradient-text mb-2">98.4%</div>
+          <div class="text-gray-400 mb-6">R@5 — 492 of 500 questions retrieved</div>
+
+          <div class="space-y-2.5 text-[14.5px]">
+            <div class="flex justify-between"><span class="text-gray-400">R@10</span><span class="font-semibold">99.4%</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">NDCG@5</span><span class="font-semibold">0.934</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Multi-session</span><span class="font-semibold">99.2%</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Single-session-user</span><span class="font-semibold">100.0%</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Knowledge-update</span><span class="font-semibold">98.7%</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Temporal-reasoning</span><span class="font-semibold">97.0%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="card overflow-hidden">
+        <div class="px-6 py-5 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-2">
+          <h3 class="text-lg font-semibold text-white">How Engram compares on LoCoMo</h3>
+          <span class="text-xs text-gray-500">Higher is better · zero-LLM systems marked No</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="bench-table">
+            <thead>
+              <tr>
+                <th>System</th>
+                <th>LoCoMo R@5</th>
+                <th>LLM required</th>
+                <th>Cost / query</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="highlight">
+                <td>Engram</td>
+                <td>93.9%</td>
+                <td>No</td>
+                <td>$0</td>
+              </tr>
+              <tr>
+                <td>EverMemOS</td>
+                <td>92.3%</td>
+                <td>Yes (cloud)</td>
+                <td class="text-gray-500">$$</td>
+              </tr>
+              <tr>
+                <td>Hindsight</td>
+                <td>89.6%</td>
+                <td>Yes (cloud)</td>
+                <td class="text-gray-500">$$</td>
+              </tr>
+              <tr>
+                <td>Zep</td>
+                <td>~85%</td>
+                <td>Yes (cloud)</td>
+                <td class="text-gray-500">$$</td>
+              </tr>
+              <tr>
+                <td>Letta / MemGPT</td>
+                <td>~83.2%</td>
+                <td>Yes (cloud)</td>
+                <td class="text-gray-500">$$</td>
+              </tr>
+              <tr>
+                <td>SLM V3 (zero-cloud)</td>
+                <td>74.8%</td>
+                <td>No</td>
+                <td>$0</td>
+              </tr>
+              <tr>
+                <td>Supermemory</td>
+                <td>~70%</td>
+                <td>Yes</td>
+                <td class="text-gray-500">$$</td>
+              </tr>
+              <tr>
+                <td>Mem0 (independent)</td>
+                <td>~58%</td>
+                <td>Yes</td>
+                <td class="text-gray-500">$$</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-glow max-w-6xl mx-auto"></div>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="relative py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-14">
+        <div class="tag-pill mb-4">Architecture</div>
+        <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
+          Three-stage hybrid retrieval.
+        </h2>
+        <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+          Dense semantic search catches meaning. Sparse BM25 catches exact words. A cross-encoder reranker scores the finalists. Nothing is summarized.
+        </p>
+      </div>
+
+      <div class="card p-8">
+        <div class="pipeline">
+          <div class="pipeline-step">
+            <div class="num">1</div>
+            <h3 class="font-semibold text-white mb-1.5">Dense</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              bge-large bi-encoder (1024d) finds semantically similar past turns.
+            </p>
+          </div>
+          <div class="pipeline-step">
+            <div class="num">2</div>
+            <h3 class="font-semibold text-white mb-1.5">Sparse</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              BM25 catches exact names, dates, and rare terms embeddings miss.
+            </p>
+          </div>
+          <div class="pipeline-step">
+            <div class="num">3</div>
+            <h3 class="font-semibold text-white mb-1.5">RRF fusion</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              Reciprocal Rank Fusion combines both signals without per-query tuning.
+            </p>
+          </div>
+          <div class="pipeline-step">
+            <div class="num">4</div>
+            <h3 class="font-semibold text-white mb-1.5">Rerank</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              Cross-encoder scores top candidates jointly for the final ranking.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ingestion tricks -->
+      <div class="grid md:grid-cols-3 gap-5 mt-6">
+        <div class="card p-6 feature-card">
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          </div>
+          <h3>Session chunking</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Long sessions dilute embeddings. Chunking at ~6 turns with 1-turn overlap keeps individual facts retrievable.
+          </p>
+        </div>
+        <div class="card p-6 feature-card">
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <h3>Timestamp prefix</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Prepending <span class="font-mono text-[13px] text-violet-300">[2024-01-15]</span> to each document lets both dense and BM25 match temporal queries.
+          </p>
+        </div>
+        <div class="card p-6 feature-card">
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <h3>Speaker-name injection</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            First-person turns don't contain the speaker's name, so entity-attribute queries fail. Prepending it bridges the gap and lifts LoCoMo R@5 by ~3pts.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-glow max-w-6xl mx-auto"></div>
+
+  <!-- QUICKSTART -->
+  <section id="quickstart" class="relative py-24 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <div class="tag-pill mb-4">Quickstart</div>
+        <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
+          Running in two minutes.
+        </h2>
+        <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+          One pip install. Works locally with FAISS + SQLite, or plugs into Qdrant for cloud deployment.
+        </p>
+      </div>
+
+      <div class="card overflow-hidden">
+        <div class="flex items-center gap-1 px-4 pt-3 border-b border-[var(--border)]">
+          <button class="tab-btn active" data-tab="cli">CLI</button>
+          <button class="tab-btn" data-tab="python">Python</button>
+          <button class="tab-btn" data-tab="cloud">Cloud</button>
+        </div>
+
+        <div class="p-0">
+          <div class="tab-panel active" data-panel="cli">
+<div class="code-block"><pre><span class="tok-comment"># Install</span>
+<span class="tok-prompt">$</span> <span class="tok-fn">pip install</span> engram-search
+
+<span class="tok-comment"># Initialize a memory store</span>
+<span class="tok-prompt">$</span> engram init <span class="tok-str">./my_memories</span>
+
+<span class="tok-comment"># Ingest past conversations</span>
+<span class="tok-prompt">$</span> engram ingest <span class="tok-str">conversations.json</span> <span class="tok-flag">--store</span> <span class="tok-str">./my_memories</span>
+
+<span class="tok-comment"># Search</span>
+<span class="tok-prompt">$</span> engram search <span class="tok-str">"why did we switch to GraphQL"</span> <span class="tok-flag">--store</span> <span class="tok-str">./my_memories</span></pre></div>
+          </div>
+
+          <div class="tab-panel" data-panel="python">
+<div class="code-block"><pre><span class="tok-kw">from</span> engram.backends.faiss_backend <span class="tok-kw">import</span> FaissBackend
+<span class="tok-kw">from</span> engram.backends.base <span class="tok-kw">import</span> Document
+<span class="tok-kw">from</span> engram.ingestion.parser <span class="tok-kw">import</span> session_to_documents
+<span class="tok-kw">from</span> engram.retrieval.embedder <span class="tok-kw">import</span> Embedder
+<span class="tok-kw">from</span> engram.retrieval.pipeline <span class="tok-kw">import</span> RetrievalPipeline
+
+embedder <span class="tok-op">=</span> <span class="tok-fn">Embedder</span>(<span class="tok-str">"bge-large"</span>)
+backend <span class="tok-op">=</span> <span class="tok-fn">FaissBackend</span>(path<span class="tok-op">=</span><span class="tok-str">"./my_memories"</span>, dimension<span class="tok-op">=</span><span class="tok-num">1024</span>)
+pipeline <span class="tok-op">=</span> <span class="tok-fn">RetrievalPipeline</span>(embedder<span class="tok-op">=</span>embedder)
+
+turns <span class="tok-op">=</span> [
+    {<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"I'm switching our API from REST to GraphQL."</span>},
+    {<span class="tok-str">"role"</span>: <span class="tok-str">"assistant"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"What's driving the switch?"</span>},
+    {<span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>, <span class="tok-str">"content"</span>: <span class="tok-str">"Too many round trips — 12 calls per screen."</span>},
+]
+docs <span class="tok-op">=</span> <span class="tok-fn">session_to_documents</span>(turns, session_id<span class="tok-op">=</span><span class="tok-str">"s1"</span>, timestamp<span class="tok-op">=</span><span class="tok-str">"2025-01-15"</span>)
+
+results <span class="tok-op">=</span> pipeline.<span class="tok-fn">search</span>(<span class="tok-str">"why did we switch to GraphQL"</span>, documents<span class="tok-op">=</span>docs, top_k<span class="tok-op">=</span><span class="tok-num">3</span>)
+<span class="tok-kw">for</span> r <span class="tok-kw">in</span> results:
+    <span class="tok-fn">print</span>(r.text)</pre></div>
+          </div>
+
+          <div class="tab-panel" data-panel="cloud">
+<div class="code-block"><pre><span class="tok-comment"># Point Engram at a managed Qdrant cluster</span>
+<span class="tok-prompt">$</span> <span class="tok-kw">export</span> ENGRAM_BACKEND<span class="tok-op">=</span>qdrant
+<span class="tok-prompt">$</span> <span class="tok-kw">export</span> ENGRAM_QDRANT_URL<span class="tok-op">=</span>https://your-cluster.qdrant.io:6333
+<span class="tok-prompt">$</span> <span class="tok-kw">export</span> ENGRAM_QDRANT_API_KEY<span class="tok-op">=</span>your-api-key
+
+<span class="tok-comment"># Start the API server</span>
+<span class="tok-prompt">$</span> <span class="tok-fn">pip install</span> fastapi uvicorn
+<span class="tok-prompt">$</span> uvicorn engram.server:app <span class="tok-flag">--host</span> 0.0.0.0 <span class="tok-flag">--port</span> 8000
+
+<span class="tok-comment"># Endpoints available</span>
+<span class="tok-comment"># POST /ingest   — add conversations</span>
+<span class="tok-comment"># POST /search   — retrieve memories</span>
+<span class="tok-comment"># GET  /health   — health check</span>
+<span class="tok-comment"># GET  /stats    — store statistics</span></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-glow max-w-6xl mx-auto"></div>
+
+  <!-- WHY ENGRAM -->
+  <section class="relative py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-14">
+        <div class="tag-pill mb-4">Why Engram</div>
+        <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
+          Built for agents that need real memory.
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="card p-6 feature-card">
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          </div>
+          <h3>Zero LLM calls</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Retrieval only. Deterministic, reproducible, no per-query spend, no prompt drift, no rate limits.
+          </p>
+        </div>
+        <div class="card p-6 feature-card">
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <h3>Exact words preserved</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Nothing is summarized or paraphrased on the way in. What you said is what gets returned.
+          </p>
+        </div>
+        <div class="card p-6 feature-card">
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.39 0 4.68.94 6.36 2.64"/><path d="M21 3v6h-6"/></svg>
+          </div>
+          <h3>Local-first</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            FAISS + SQLite out of the box. Runs entirely on your machine. No API keys needed to get started.
+          </p>
+        </div>
+        <div class="card p-6 feature-card">
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+          </div>
+          <h3>Cloud-ready</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Plug into Qdrant for multi-tenant, horizontally-scalable memory. Same API, same accuracy.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="relative py-24 px-6">
+    <div class="max-w-3xl mx-auto text-center">
+      <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-5">
+        Ready to give your agent a memory?
+      </h2>
+      <p class="text-lg text-gray-400 mb-9">
+        MIT licensed. Reproducible benchmarks. Drop it into your RAG pipeline today.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div class="install-block min-w-[320px]">
+          <span class="tok-prompt">$</span>
+          <span><span class="tok-fn">pip install</span> engram-search</span>
+          <button onclick="copyInstall(this)">Copy</button>
+        </div>
+        <a
+          href="https://github.com/Nitin-Gupta1109/engram"
+          target="_blank"
+          rel="noopener"
+          class="btn btn-primary"
+        >
+          Star on GitHub
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5l3.668 7.432 8.2 1.192-5.934 5.781 1.402 8.168L12 19.23l-7.336 3.843 1.402-8.168L.132 9.124l8.2-1.192z"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="relative border-t border-[var(--border)] py-10 px-6 mt-12">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2.5">
+        <img src="logo.svg" alt="" width="24" height="24" />
+        <span class="text-sm text-gray-400">
+          Engram · MIT licensed · Built by
+          <a href="https://github.com/Nitin-Gupta1109" target="_blank" rel="noopener" class="text-violet-400 hover:text-violet-300">Nitin Gupta</a>
+        </span>
+      </div>
+      <div class="flex items-center gap-6 text-sm text-gray-500">
+        <a href="https://github.com/Nitin-Gupta1109/engram" target="_blank" rel="noopener" class="nav-link">GitHub</a>
+        <a href="https://pypi.org/project/engram-search/" target="_blank" rel="noopener" class="nav-link">PyPI</a>
+        <a href="https://github.com/Nitin-Gupta1109/engram/blob/main/LICENSE" target="_blank" rel="noopener" class="nav-link">License</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function copyInstall(btn) {
+      navigator.clipboard.writeText("pip install engram-search").then(() => {
+        const orig = btn.textContent;
+        btn.textContent = "Copied";
+        setTimeout(() => (btn.textContent = orig), 1400);
+      });
+    }
+
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const tab = btn.getAttribute("data-tab");
+        const parent = btn.closest(".card");
+        parent.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        parent.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        parent.querySelector(`.tab-panel[data-panel="${tab}"]`).classList.add("active");
+      });
+    });
+  </script>
+</body>
+</html>
