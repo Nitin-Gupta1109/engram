@@ -42,17 +42,19 @@
 
 | Metric | Score |
 |--------|-------|
-| R@5 | **75.3%** (1492/1982) |
-| R@10 | 88.8% |
-| NDCG@5 | 0.557 |
+| R@5 | **89.6%** (1776/1982) |
+| R@10 | 92.6% |
+| NDCG@5 | 0.829 |
 
 | Category | R@5 | R@10 |
 |----------|-----|------|
-| Single-hop (factual) | 79.1% | 93.3% |
-| Temporal (dates) | 70.1% | 84.4% |
-| Multi-hop (inference) | 59.8% | 76.1% |
-| Contextual (details) | 77.1% | 90.1% |
-| Adversarial (speaker) | 76.5% | 89.5% |
+| Single-hop (factual) | 85.8% | 91.8% |
+| Temporal (dates) | 89.4% | 92.5% |
+| Multi-hop (inference) | 63.0% | 70.7% |
+| Contextual (details) | 93.3% | 95.6% |
+| Adversarial (speaker) | 90.6% | 92.2% |
+
+_Reported with `--mode rerank` (chunking + cross-encoder reranker)._
 
 ## What It Does
 
@@ -67,15 +69,15 @@ Nothing is summarized. Nothing is paraphrased. Your exact words are stored and r
 | System | LoCoMo Accuracy | LLM Required |
 |--------|----------------|--------------|
 | EverMemOS | 92.3% | Yes (cloud) |
+| **Engram** | **89.6%** | **No** |
 | Hindsight | 89.6% | Yes (cloud) |
 | Zep | ~85% | Yes (cloud) |
 | Letta / MemGPT | ~83.2% | Yes (cloud) |
-| **Engram** | **75.3%** | **No** |
 | SLM V3 (zero-cloud) | 74.8% | No |
 | Supermemory | ~70% | Yes |
 | Mem0 (independent) | ~58% | Yes |
 
-Engram is the **top-performing zero-LLM system** on LoCoMo, competitive with paid cloud-LLM services at $0/query.
+Engram is the **top-performing zero-LLM system** on LoCoMo — matching paid cloud-LLM services like Hindsight at $0/query.
 
 ### LongMemEval
 
@@ -240,7 +242,7 @@ python benchmarks/longmemeval_bench.py data/longmemeval_s_cleaned.json --mode hy
 curl -fsSL -o data/locomo10.json \
   https://raw.githubusercontent.com/snap-research/locomo/main/data/locomo10.json
 
-python benchmarks/locomo_bench.py data/locomo10.json --mode hybrid
+python benchmarks/locomo_bench.py data/locomo10.json --mode rerank
 ```
 
 ## Requirements
