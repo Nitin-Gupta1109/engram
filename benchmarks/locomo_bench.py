@@ -84,10 +84,12 @@ def parse_locomo_conversation(conv):
     LoCoMo format: conversation object with session_1, session_2, etc.
     Each session has turns with {speaker, dia_id, text}.
 
-    Returns list of (session_id, timestamp, turns) where turns are
-    [{role, content}] format matching Engram's ingestion.
+    Returns (sessions, speaker_names) where sessions is a list of
+    {session_id, timestamp, turns} and speaker_names maps role -> name.
     """
     speaker_a = conv["speaker_a"]
+    speaker_b = conv.get("speaker_b", "")
+    speaker_names = {"user": speaker_a, "assistant": speaker_b}
     sessions = []
 
     # Find all session keys
@@ -116,7 +118,7 @@ def parse_locomo_conversation(conv):
             "turns": turns,
         })
 
-    return sessions
+    return sessions, speaker_names
 
 
 def evidence_to_session_ids(evidence_list):
@@ -202,7 +204,7 @@ def run_benchmark(
         print(f"\n[Conversation {ci + 1}/{len(data)}] {sample_id} — {len(qa_list)} questions")
 
         # --- Parse and ingest all sessions for this conversation ---
-        sessions = parse_locomo_conversation(conv)
+        sessions, speaker_names = parse_locomo_conversation(conv)
         print(f"  Sessions: {len(sessions)}, ingesting...")
 
         all_docs_raw = []
@@ -215,6 +217,7 @@ def run_benchmark(
                 timestamp=sess["timestamp"],
                 include_assistant=include_assistant,
                 generate_preference_doc=use_prefs,
+                speaker_names=speaker_names,
             )
             for doc_info in parsed:
                 all_docs_raw.append(doc_info)

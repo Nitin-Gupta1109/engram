@@ -181,3 +181,34 @@ class TestSessionToDocuments:
     def test_empty_session(self):
         docs = session_to_documents([], "sess_empty")
         assert docs == []
+
+    def test_speaker_names_prepended_to_primary(self):
+        session = self._make_session()
+        docs = session_to_documents(
+            session, "sess1", speaker_names={"user": "Nate", "assistant": "Joanna"}
+        )
+        primary = [d for d in docs if d["id"] == "sess1"][0]
+        assert "Nate: I've been working on my garden" in primary["text"]
+        assert "Nate: I grow tomatoes" in primary["text"]
+
+    def test_speaker_names_prepended_to_assistant_doc(self):
+        session = self._make_session()
+        docs = session_to_documents(
+            session, "sess1", speaker_names={"user": "Nate", "assistant": "Joanna"}
+        )
+        asst = [d for d in docs if d["id"] == "sess1_asst"][0]
+        assert "Joanna: That sounds great" in asst["text"]
+
+    def test_speaker_names_in_preference_doc(self):
+        session = self._make_session()
+        docs = session_to_documents(session, "sess1", speaker_names={"user": "Nate"})
+        pref = [d for d in docs if d["id"] == "sess1_pref"][0]
+        assert "Nate has mentioned:" in pref["text"]
+
+    def test_no_speaker_names_keeps_old_behavior(self):
+        session = self._make_session()
+        docs = session_to_documents(session, "sess1")
+        primary = [d for d in docs if d["id"] == "sess1"][0]
+        # No "Nate:" prefix; turns appear unmodified
+        assert "I've been working on my garden" in primary["text"]
+        assert "Nate:" not in primary["text"]

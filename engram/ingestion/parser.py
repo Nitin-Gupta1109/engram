@@ -8,6 +8,7 @@ Indexing strategy:
 """
 
 import re
+from typing import Optional
 
 # Preference patterns — detect how people express preferences in conversation.
 PREFERENCE_PATTERNS = [
@@ -209,6 +210,23 @@ def _chunk_turns(turns: list, max_turns: int = 6, overlap: int = 1) -> list:
     return chunks
 
 
+def _render_turn(turn: dict, speaker_names: Optional[dict]) -> str:
+    """Render a turn as text, prepending the speaker name if provided.
+
+    First-person turns ("I got a PS5") don't contain the speaker's name,
+    so entity-attribute queries ("What console does Nate own?") can't
+    match. Injecting the name ("Nate: I got a PS5") bridges this gap for
+    both dense and BM25 retrieval.
+    """
+    content = turn["content"]
+    if not speaker_names:
+        return content
+    name = speaker_names.get(turn.get("role"))
+    if not name:
+        return content
+    return f"{name}: {content}"
+
+
 def session_to_documents(
     session: list,
     session_id: str,
@@ -218,6 +236,7 @@ def session_to_documents(
     generate_assistant_doc: bool = True,
     generate_topic_doc: bool = True,
     chunk_max_turns: int = 6,
+    speaker_names: Optional[dict] = None,
 ) -> list:
     """Convert a conversation session into indexable documents.
 
@@ -229,12 +248,15 @@ def session_to_documents(
     - Prepend timestamp to text for temporal retrieval
     - Assistant turns as separate doc (catches assistant-reference questions)
     - Synthetic preference and topic docs for vocabulary bridging
+    - Optional speaker_names (e.g. {"user": "Nate"}) prepends the speaker
+      to each turn so entity-attribute queries match first-person facts
     """
     docs = []
     ts_prefix = _format_timestamp_prefix(timestamp)
 
-    user_text = "\n".join(t["content"] for t in session if t.get("role") == "user")
-    assistant_text = "\n".join(t["content"] for t in session if t.get("role") == "assistant")
+    assistant_text = "\n".join(
+        _render_turn(t, speaker_names) for t in session if t.get("role") == "assistant"
+    )
 
     # Primary documents: chunk long sessions into smaller segments
     if include_assistant:
@@ -245,7 +267,7 @@ def session_to_documents(
     chunks = _chunk_turns(all_turns, max_turns=chunk_max_turns)
 
     for ci, chunk in enumerate(chunks):
-        chunk_text = "\n".join(t["content"] for t in chunk)
+        chunk_text = "\n".join(_render_turn(t, speaker_names) for t in chunk)
         if not chunk_text.strip():
             continue
 
@@ -284,7 +306,8 @@ def session_to_documents(
     if generate_preference_doc:
         prefs = extract_preferences(session)
         if prefs:
-            pref_text = ts_prefix + "User has mentioned: " + "; ".join(prefs)
+            speaker_label = (speaker_names or {}).get("user") or "User"
+            pref_text = ts_prefix + f"{speaker_label} has mentioned: " + "; ".join(prefs)
             docs.append(
                 {
                     "id": f"{session_id}_pref",
