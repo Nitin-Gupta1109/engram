@@ -173,6 +173,42 @@ def is_assistant_reference(question: str) -> bool:
     return any(t in q for t in triggers)
 
 
+def _format_timestamp_prefix(timestamp: str) -> str:
+    """Format a timestamp string as a prefix for document text.
+
+    This embeds the date into the text so both dense and BM25 retrieval
+    can match temporal queries (e.g. "When did X happen in July?").
+    """
+    if not timestamp:
+        return ""
+    return f"[{timestamp}] "
+
+
+def _chunk_turns(turns: list, max_turns: int = 6, overlap: int = 1) -> list:
+    """Split a turn list into overlapping chunks.
+
+    Long sessions dilute embeddings — a 20-turn session buries individual
+    facts. Chunking at ~6 turns keeps embeddings focused while overlap
+    preserves conversational context across boundaries.
+
+    Returns list of turn sublists.
+    """
+    if len(turns) <= max_turns:
+        return [turns]
+
+    chunks = []
+    start = 0
+    while start < len(turns):
+        end = min(start + max_turns, len(turns))
+        chunks.append(turns[start:end])
+        # Advance by at least 1 to avoid infinite loop at the tail
+        next_start = end - overlap
+        if next_start <= start:
+            next_start = start + 1
+        start = next_start
+    return chunks
+
+
 def session_to_documents(
     session: list,
     session_id: str,
@@ -181,32 +217,50 @@ def session_to_documents(
     generate_preference_doc: bool = True,
     generate_assistant_doc: bool = True,
     generate_topic_doc: bool = True,
+    chunk_max_turns: int = 6,
 ) -> list:
     """Convert a conversation session into indexable documents.
 
     Returns list of dicts with keys: id, text, metadata, is_synthetic.
 
-    Strategy: user turns as primary doc (focused embeddings), assistant
-    turns as a separate doc (catches assistant-reference questions),
-    plus synthetic preference and topic docs for vocabulary bridging.
+    Strategy:
+    - Chunk long sessions into overlapping segments (~6 turns) so facts
+      don't get diluted in long-document embeddings
+    - Prepend timestamp to text for temporal retrieval
+    - Assistant turns as separate doc (catches assistant-reference questions)
+    - Synthetic preference and topic docs for vocabulary bridging
     """
     docs = []
+    ts_prefix = _format_timestamp_prefix(timestamp)
 
     user_text = "\n".join(t["content"] for t in session if t.get("role") == "user")
     assistant_text = "\n".join(t["content"] for t in session if t.get("role") == "assistant")
 
-    # Primary document: user turns (or full if include_assistant)
+    # Primary documents: chunk long sessions into smaller segments
     if include_assistant:
-        main_text = "\n".join(t["content"] for t in session)
+        all_turns = session
     else:
-        main_text = user_text
+        all_turns = [t for t in session if t.get("role") == "user"]
 
-    if main_text.strip():
+    chunks = _chunk_turns(all_turns, max_turns=chunk_max_turns)
+
+    for ci, chunk in enumerate(chunks):
+        chunk_text = "\n".join(t["content"] for t in chunk)
+        if not chunk_text.strip():
+            continue
+
+        doc_text = ts_prefix + chunk_text
+        chunk_id = session_id if len(chunks) == 1 else f"{session_id}_c{ci}"
+
         docs.append(
             {
-                "id": session_id,
-                "text": main_text,
-                "metadata": {"session_id": session_id, "timestamp": timestamp, "type": "session"},
+                "id": chunk_id,
+                "text": doc_text,
+                "metadata": {
+                    "session_id": session_id,
+                    "timestamp": timestamp,
+                    "type": "session",
+                },
                 "is_synthetic": False,
             }
         )
@@ -216,7 +270,7 @@ def session_to_documents(
         docs.append(
             {
                 "id": f"{session_id}_asst",
-                "text": assistant_text,
+                "text": ts_prefix + assistant_text,
                 "metadata": {
                     "session_id": session_id,
                     "timestamp": timestamp,
@@ -230,7 +284,7 @@ def session_to_documents(
     if generate_preference_doc:
         prefs = extract_preferences(session)
         if prefs:
-            pref_text = "User has mentioned: " + "; ".join(prefs)
+            pref_text = ts_prefix + "User has mentioned: " + "; ".join(prefs)
             docs.append(
                 {
                     "id": f"{session_id}_pref",
@@ -248,7 +302,7 @@ def session_to_documents(
     if generate_topic_doc:
         topics = extract_topics(session)
         if topics:
-            topic_text = "Topics discussed: " + ", ".join(topics)
+            topic_text = ts_prefix + "Topics discussed: " + ", ".join(topics)
             docs.append(
                 {
                     "id": f"{session_id}_topic",
