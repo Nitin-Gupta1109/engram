@@ -27,6 +27,9 @@ class TestFaissBackend:
         assert backend.count() == 0
 
     def test_query_returns_results(self):
+        # Seeded so the random doc + query vectors deterministically yield
+        # enough positive inner products to clear the backend's min_score=0 filter.
+        np.random.seed(2)
         backend = FaissBackend(dimension=8)
         docs = [_make_doc(f"d{i}", f"document {i}") for i in range(10)]
         backend.add(docs)
