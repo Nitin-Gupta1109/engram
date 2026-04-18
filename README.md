@@ -6,6 +6,7 @@
 
 <p align="center">
   <strong>High-recall conversational memory retrieval. Local-first, cloud-ready.</strong>
+  <strong> 93.9% LoCoMo — no LLM</strong>
 </p>
 
 <p align="center">
