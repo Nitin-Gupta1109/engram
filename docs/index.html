@@ -796,8 +796,14 @@ results <span class="tok-op">=</span> pipeline.<span class="tok-fn">search</span
       <div class="text-center mb-14">
         <div class="tag-pill mb-4">Why Engram</div>
         <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
-          Built for agents that need real memory.
+          LLMs are getting better — but memory is still broken.
         </h2>
+        <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-6">
+          Even the best agents forget past interactions, lose long-term context, and rely on expensive reprocessing.
+        </p>
+        <p class="text-lg text-white max-w-2xl mx-auto font-medium">
+          Engram fixes this at the infrastructure layer.
+        </p>
       </div>
 
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -838,6 +844,135 @@ results <span class="tok-op">=</span> pipeline.<span class="tok-fn">search</span
           </p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <div class="divider-glow max-w-6xl mx-auto"></div>
+
+  <!-- USE CASES -->
+  <section class="relative py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-14">
+        <div class="tag-pill mb-4">Use Cases</div>
+        <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
+          Where Engram fits.
+        </h2>
+        <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+          Drop-in memory for any system that needs to remember conversations across time.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="card p-6 feature-card">
+          <h3>AI assistants with long-term memory</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Recall user preferences, past decisions, and prior context across sessions — without re-feeding the full history into every prompt.
+          </p>
+        </div>
+        <div class="card p-6 feature-card">
+          <h3>Customer support agents</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Pull a customer's full history on every interaction. No transcript dumps, no context bloat, no $ per token.
+          </p>
+        </div>
+        <div class="card p-6 feature-card">
+          <h3>Agent memory layer</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Give autonomous agents persistent memory across runs without blowing up the context window.
+          </p>
+        </div>
+        <div class="card p-6 feature-card">
+          <h3>Multi-session chatbots</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Resolve references to prior conversations ("like we discussed last week") without re-embedding history on every turn.
+          </p>
+        </div>
+        <div class="card p-6 feature-card">
+          <h3>RAG over conversations</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Index dialogues, meeting transcripts, or support tickets with higher recall than vanilla semantic search.
+          </p>
+        </div>
+        <div class="card p-6 feature-card">
+          <h3>Personal AI with real history</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Build personal assistants that actually remember what you told them — exact words, not summaries.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-glow max-w-6xl mx-auto"></div>
+
+  <!-- ROADMAP -->
+  <section class="relative py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-14">
+        <div class="tag-pill mb-4">Roadmap</div>
+        <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
+          What's next.
+        </h2>
+        <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+          Shipping more integrations, more backends, and deeper temporal reasoning.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+        <div class="card p-5 feature-card">
+          <h3>LangChain + LlamaIndex integrations</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Drop-in memory modules for existing agent stacks.
+          </p>
+        </div>
+        <div class="card p-5 feature-card">
+          <h3>MCP server</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Expose Engram as a Model Context Protocol tool for Claude, Cursor, and other MCP clients.
+          </p>
+        </div>
+        <div class="card p-5 feature-card">
+          <h3>Streaming ingestion</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Append turns to a live session without re-indexing.
+          </p>
+        </div>
+        <div class="card p-5 feature-card">
+          <h3>Multi-tenant isolation</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Per-user namespaces for hosted deployments.
+          </p>
+        </div>
+        <div class="card p-5 feature-card">
+          <h3>Async API</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Non-blocking ingest/search for high-throughput workloads.
+          </p>
+        </div>
+        <div class="card p-5 feature-card">
+          <h3>More backends</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            pgvector, Weaviate, and Pinecone adapters.
+          </p>
+        </div>
+        <div class="card p-5 feature-card">
+          <h3>Temporal reasoning boost</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Improved date-grounding for "when did we…" queries.
+          </p>
+        </div>
+        <div class="card p-5 feature-card">
+          <h3>Benchmark expansion</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Add MSC, DialogSum, and custom domain benchmarks.
+          </p>
+        </div>
+      </div>
+
+      <p class="text-center text-sm text-gray-500 mt-10">
+        Have a use case we're missing?
+        <a href="https://github.com/Nitin-Gupta1109/engram/issues" target="_blank" rel="noopener" class="text-violet-400 hover:text-violet-300">Open an issue</a>.
+      </p>
     </div>
   </section>
 
