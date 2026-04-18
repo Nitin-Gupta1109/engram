@@ -32,6 +32,12 @@ dependencies = [
     "numpy>=1.24",
 ]
 
+[project.urls]
+Homepage = "https://engram-search.com"
+Repository = "https://github.com/Nitin-Gupta1109/engram"
+Issues = "https://github.com/Nitin-Gupta1109/engram/issues"
+Changelog = "https://github.com/Nitin-Gupta1109/engram/releases"
+
 [project.optional-dependencies]
 cloud = [
     "qdrant-client>=1.9",
