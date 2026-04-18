@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://engram-search.com"><img src="https://img.shields.io/badge/site-engram--search.com-6D28D9?style=flat&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyeiIvPjwvc3ZnPg==" alt="Website"></a>
   <a href="https://pypi.org/project/engram-search/"><img src="https://img.shields.io/pypi/v/engram-search?color=blue" alt="PyPI"></a>
   <a href="https://github.com/Nitin-Gupta1109/engram/actions"><img src="https://github.com/Nitin-Gupta1109/engram/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/Nitin-Gupta1109/engram/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
