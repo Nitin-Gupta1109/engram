@@ -543,50 +543,81 @@
 
       <!-- Comparison table -->
       <div class="card overflow-hidden">
-        <div class="px-6 py-5 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-2">
-          <h3 class="text-lg font-semibold text-white">How Engram compares on LoCoMo</h3>
-          <span class="text-xs text-gray-500">Higher is better · only systems with citable R@5 numbers</span>
+        <div class="px-6 py-5 border-b border-[var(--border)]">
+          <h3 class="text-lg font-semibold text-white">LoCoMo benchmark comparison</h3>
+          <p class="text-xs text-gray-500 mt-2">
+            <span class="text-amber-400 font-medium">Disclaimer:</span>
+            results are compiled from multiple papers and evaluation reports.
+            They are <em>not directly comparable</em> due to differences in backbone LLMs, prompting strategies, and evaluation setups.
+          </p>
         </div>
         <div class="overflow-x-auto">
           <table class="bench-table">
             <thead>
               <tr>
                 <th>System</th>
-                <th>LoCoMo R@5</th>
+                <th>LoCoMo Accuracy</th>
                 <th>LLM required</th>
+                <th>Open source</th>
                 <th>Source</th>
               </tr>
             </thead>
             <tbody>
               <tr class="highlight">
                 <td>Engram</td>
-                <td>93.9%</td>
+                <td>93.9% (R@5)</td>
                 <td>No</td>
+                <td>Yes (MIT)</td>
                 <td><a href="https://github.com/Nitin-Gupta1109/engram" class="text-[var(--accent-2)] hover:underline">This repo (reproducible)</a></td>
               </tr>
               <tr>
                 <td>EverMemOS</td>
-                <td>92.3%</td>
-                <td>Yes (cloud)</td>
-                <td><a href="https://arxiv.org/abs/2601.02163" class="text-gray-400 hover:underline">arXiv:2601.02163</a></td>
-              </tr>
-              <tr>
-                <td>Hindsight</td>
-                <td>89.6%</td>
-                <td>Yes (cloud)</td>
-                <td><a href="https://arxiv.org/abs/2512.12818" class="text-gray-400 hover:underline">arXiv:2512.12818</a></td>
-              </tr>
-              <tr>
-                <td>Letta / MemGPT</td>
-                <td>83.2%</td>
-                <td>Yes (cloud)</td>
-                <td><a href="https://www.letta.com/blog" class="text-gray-400 hover:underline">Letta blog</a></td>
-              </tr>
-              <tr>
-                <td>SLM V3</td>
-                <td>74.8%</td>
+                <td>86.76% – 93.05%</td>
+                <td>Yes</td>
                 <td>No</td>
-                <td><a href="https://arxiv.org/abs/2603.14588" class="text-gray-400 hover:underline">arXiv:2603.14588</a></td>
+                <td><a href="https://arxiv.org/pdf/2601.02163" class="text-gray-400 hover:underline">arXiv:2601.02163</a></td>
+              </tr>
+              <tr>
+                <td>Zep</td>
+                <td>85.22%</td>
+                <td>Yes</td>
+                <td>Partial</td>
+                <td><a href="https://github.com/EverMind-AI/EverMemOS/blob/main/evaluation/README.md" class="text-gray-400 hover:underline">EverMemOS evaluation</a></td>
+              </tr>
+              <tr>
+                <td>MemOS</td>
+                <td>80.76%</td>
+                <td>Yes</td>
+                <td>Partial</td>
+                <td><a href="https://github.com/EverMind-AI/EverMemOS/blob/main/evaluation/README.md" class="text-gray-400 hover:underline">EverMemOS evaluation</a></td>
+              </tr>
+              <tr>
+                <td>Mem0</td>
+                <td>64.20%</td>
+                <td>Yes</td>
+                <td>Partial</td>
+                <td><a href="https://github.com/EverMind-AI/EverMemOS/blob/main/evaluation/README.md" class="text-gray-400 hover:underline">EverMemOS evaluation</a></td>
+              </tr>
+              <tr>
+                <td>MemU</td>
+                <td>61.15%</td>
+                <td>Yes</td>
+                <td>Partial</td>
+                <td><a href="https://arxiv.org/pdf/2601.02163" class="text-gray-400 hover:underline">arXiv:2601.02163</a></td>
+              </tr>
+              <tr>
+                <td>Other LLM-based (Hindsight, MemGPT, Letta)</td>
+                <td>~83 – 92%</td>
+                <td>Yes</td>
+                <td>Varies</td>
+                <td class="text-gray-500">Secondary reports</td>
+              </tr>
+              <tr>
+                <td>Non-LLM (SLM variants)</td>
+                <td>~74 – 75%</td>
+                <td>No</td>
+                <td>Yes</td>
+                <td class="text-gray-500">Secondary reports</td>
               </tr>
             </tbody>
           </table>

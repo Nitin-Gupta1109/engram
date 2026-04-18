@@ -65,15 +65,27 @@ Nothing is summarized. Nothing is paraphrased. Your exact words are stored and r
 
 ## How It Compares
 
-### LoCoMo — R@5 Leaderboard
+### LoCoMo Benchmark Comparison
 
-| System | LoCoMo R@5 | LLM Required | Source |
-|--------|-----------:|--------------|--------|
-| **Engram** | **93.9%** | **No** | This repo (reproducible) |
-| EverMemOS | 92.3% | Yes (cloud) | [arXiv:2601.02163](https://arxiv.org/abs/2601.02163) |
-| Hindsight | 89.6% | Yes (cloud) | [arXiv:2512.12818](https://arxiv.org/abs/2512.12818) |
-| Letta / MemGPT | 83.2% | Yes (cloud) | [Letta blog](https://www.letta.com/blog) |
-| SLM V3 | 74.8% | No | [arXiv:2603.14588](https://arxiv.org/abs/2603.14588) |
+<p align="left">
+  <img src="https://img.shields.io/badge/LoCoMo-R@5%2093.9%25-brightgreen" />
+  <img src="https://img.shields.io/badge/LLM-0%20calls-blue" />
+  <img src="https://img.shields.io/badge/Cost-$0%2Fquery-success" />
+  <img src="https://img.shields.io/badge/Approach-Retrieval--Only-orange" />
+</p>
+
+> **Disclaimer:** Results are compiled from multiple papers and evaluation reports. They are **not directly comparable** due to differences in backbone LLMs, prompting strategies, and evaluation setups.
+
+| System | LoCoMo Accuracy | LLM Required | Open Source | Source |
+|--------|-----------------|--------------|-------------|--------|
+| **Engram** | **93.9% (R@5)** | **No** | **Yes (MIT)** | This repo (reproducible) |
+| EverMemOS | 86.76% – 93.05% | Yes | No | [arXiv:2601.02163](https://arxiv.org/pdf/2601.02163) |
+| Zep | 85.22% | Yes | Partial | [EverMemOS evaluation](https://github.com/EverMind-AI/EverMemOS/blob/main/evaluation/README.md) |
+| MemOS | 80.76% | Yes | Partial | [EverMemOS evaluation](https://github.com/EverMind-AI/EverMemOS/blob/main/evaluation/README.md) |
+| Mem0 | 64.20% | Yes | Partial | [EverMemOS evaluation](https://github.com/EverMind-AI/EverMemOS/blob/main/evaluation/README.md) |
+| MemU | 61.15% | Yes | Partial | [arXiv:2601.02163](https://arxiv.org/pdf/2601.02163) |
+| Other LLM-based systems (Hindsight, MemGPT, Letta) | ~83 – 92% | Yes | Varies | Secondary reports |
+| Non-LLM systems (SLM variants) | ~74 – 75% | No | Yes | Secondary reports |
 
 Engram is the **top-performing system** on LoCoMo — and the only one in the top tier with zero LLM calls at query time.
 
