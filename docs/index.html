@@ -173,6 +173,105 @@
       font-weight: 500;
     }
 
+    .stat-chip {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 22px;
+      border-radius: 14px;
+      background: linear-gradient(
+        180deg,
+        rgba(31, 27, 46, 0.6) 0%,
+        rgba(15, 15, 26, 0.4) 100%
+      );
+      border: 1px solid var(--border);
+      min-width: 140px;
+    }
+
+    .stat-chip .stat-value {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #C084FC 0%, #67E8F9 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-chip .stat-label {
+      margin-top: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9CA3AF;
+    }
+
+    .contrast-card {
+      background: linear-gradient(
+        180deg,
+        rgba(31, 27, 46, 0.5) 0%,
+        rgba(15, 15, 26, 0.3) 100%
+      );
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+    }
+
+    .contrast-card.before {
+      opacity: 0.85;
+    }
+
+    .contrast-card.after {
+      border-color: rgba(139, 92, 246, 0.35);
+      box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.08),
+        0 18px 50px -24px rgba(124, 58, 237, 0.45);
+    }
+
+    .contrast-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 18px;
+      color: #9CA3AF;
+    }
+
+    .contrast-card.after h3 {
+      color: #C4B5FD;
+    }
+
+    .contrast-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      font-size: 15px;
+      line-height: 1.55;
+      color: #D1D5DB;
+    }
+
+    .contrast-row + .contrast-row {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .contrast-mark {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+    }
+
+    .contrast-card.before .contrast-mark {
+      color: #6B7280;
+    }
+
+    .contrast-card.after .contrast-mark {
+      color: #A78BFA;
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -443,13 +542,28 @@
         #1 on LoCoMo benchmark — zero LLM required
       </div>
 
-      <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter leading-[1.05] mb-6">
+      <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter leading-[1.05] mb-8">
         Conversational memory<br />
         that actually <span class="gradient-text">remembers.</span>
       </h1>
 
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
+        <div class="stat-chip">
+          <span class="stat-value">93.9%</span>
+          <span class="stat-label">LoCoMo R@5</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-value">0</span>
+          <span class="stat-label">LLM calls</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-value">$0</span>
+          <span class="stat-label">per query</span>
+        </div>
+      </div>
+
       <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-        State-of-the-art retrieval over past conversations — 93.9% R@5 on LoCoMo, 98.4% on LongMemEval. No LLM calls. $0 per query. Your words, stored exactly as you said them.
+        State-of-the-art retrieval over past conversations. Your words, stored exactly as you said them — retrieved with zero LLM calls at query time.
       </p>
 
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
@@ -481,6 +595,52 @@
         <div class="flex items-center gap-2">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           Python 3.9+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BEFORE / AFTER -->
+  <section class="relative py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <div class="tag-pill mb-4">The shift</div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          Memory that breaks → memory that works.
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-5">
+        <div class="contrast-card before">
+          <h3>Without memory infrastructure</h3>
+          <div class="contrast-row">
+            <svg class="contrast-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span>Forgets past turns</span>
+          </div>
+          <div class="contrast-row">
+            <svg class="contrast-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span>Re-embeds or paraphrases on every call</span>
+          </div>
+          <div class="contrast-row">
+            <svg class="contrast-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span>$ per query, rate limits, prompt drift</span>
+          </div>
+        </div>
+
+        <div class="contrast-card after">
+          <h3>With Engram</h3>
+          <div class="contrast-row">
+            <svg class="contrast-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>93.9% recall across sessions</span>
+          </div>
+          <div class="contrast-row">
+            <svg class="contrast-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Exact words, retrieved verbatim</span>
+          </div>
+          <div class="contrast-row">
+            <svg class="contrast-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>$0 per query, deterministic, reproducible</span>
+          </div>
         </div>
       </div>
     </div>

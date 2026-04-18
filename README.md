@@ -31,6 +31,12 @@ Even the best agents:
 
 No LLM calls at query time. No summarization. No paraphrasing. Your exact words, retrieved with state-of-the-art recall.
 
+| Without memory infrastructure | With Engram |
+|---|---|
+| ✕ Forgets past turns | ✓ 93.9% recall across sessions |
+| ✕ Re-embeds or paraphrases on every call | ✓ Exact words, retrieved verbatim |
+| ✕ $ per query, rate limits, prompt drift | ✓ $0 per query, deterministic, reproducible |
+
 ## Benchmark Results
 
 **Tested on two major benchmarks** — no LLM required, zero cost per query.
