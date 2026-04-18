@@ -5,8 +5,8 @@
 <h1 align="center">Engram</h1>
 
 <p align="center">
-  <strong>93.9% LoCoMo retrieval — without using an LLM</strong><br/>
-  Local-first memory engine for AI agents
+  <strong>High-recall memory for AI agents</strong><br/>
+  93.9% LoCoMo • Zero LLM calls • Local-first, cloud-ready
 </p>
 
 <p align="center">
