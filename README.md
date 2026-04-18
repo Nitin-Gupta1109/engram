@@ -18,6 +18,19 @@
 
 ---
 
+## Why Engram
+
+LLMs are getting better — but memory is still broken.
+
+Even the best agents:
+- forget past interactions
+- lose long-term context
+- rely on expensive reprocessing
+
+**Engram fixes this at the infrastructure layer.**
+
+No LLM calls at query time. No summarization. No paraphrasing. Your exact words, retrieved with state-of-the-art recall.
+
 ## Benchmark Results
 
 **Tested on two major benchmarks** — no LLM required, zero cost per query.
@@ -191,6 +204,14 @@ uvicorn engram.server:app --host 0.0.0.0 --port 8000
 | `GET` | `/health` | Health check |
 | `GET` | `/stats` | Store statistics |
 
+## Use Cases
+
+- **AI assistants with long-term memory** — recall user preferences, past decisions, and prior context across sessions
+- **Customer support agents** — pull a customer's full history on every interaction without re-feeding transcripts to an LLM
+- **Agent memory layer** — give autonomous agents persistent memory across runs without blowing up the context window
+- **Multi-session chatbots** — resolve references to prior conversations ("like we discussed last week") without re-embedding history
+- **RAG over conversations** — index dialogues, meeting transcripts, or support tickets with higher recall than vanilla semantic search
+
 ## Examples
 
 Check out the interactive notebooks in [`examples/`](examples/):
@@ -260,6 +281,19 @@ python benchmarks/locomo_bench.py data/locomo10.json --mode rerank
 - Python 3.9+
 - ~1.3 GB disk for bge-large embedding model (downloaded on first use)
 - No API keys required for local mode
+
+## Roadmap
+
+- [ ] **LangChain + LlamaIndex integrations** — drop-in memory modules for existing agent stacks
+- [ ] **MCP server** — expose Engram as a Model Context Protocol tool for Claude, Cursor, and other MCP clients
+- [ ] **Streaming ingestion** — append turns to a live session without re-indexing
+- [ ] **Multi-tenant isolation** — per-user namespaces for hosted deployments
+- [ ] **Async API** — non-blocking ingest/search for high-throughput workloads
+- [ ] **More backends** — pgvector, Weaviate, Pinecone adapters
+- [ ] **Temporal reasoning boost** — improved date-grounding for "when did we..." queries
+- [ ] **Benchmark expansion** — add MSC, DialogSum, and custom domain benchmarks
+
+Have a use case we're missing? [Open an issue](https://github.com/Nitin-Gupta1109/engram/issues).
 
 ## License
 
