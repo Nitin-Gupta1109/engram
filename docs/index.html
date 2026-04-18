@@ -545,7 +545,7 @@
       <div class="card overflow-hidden">
         <div class="px-6 py-5 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-2">
           <h3 class="text-lg font-semibold text-white">How Engram compares on LoCoMo</h3>
-          <span class="text-xs text-gray-500">Higher is better · zero-LLM systems marked No</span>
+          <span class="text-xs text-gray-500">Higher is better · only systems with citable R@5 numbers</span>
         </div>
         <div class="overflow-x-auto">
           <table class="bench-table">
@@ -554,7 +554,7 @@
                 <th>System</th>
                 <th>LoCoMo R@5</th>
                 <th>LLM required</th>
-                <th>Cost / query</th>
+                <th>Source</th>
               </tr>
             </thead>
             <tbody>
@@ -562,49 +562,31 @@
                 <td>Engram</td>
                 <td>93.9%</td>
                 <td>No</td>
-                <td>$0</td>
+                <td><a href="https://github.com/Nitin-Gupta1109/engram" class="text-[var(--accent-2)] hover:underline">This repo (reproducible)</a></td>
               </tr>
               <tr>
                 <td>EverMemOS</td>
                 <td>92.3%</td>
                 <td>Yes (cloud)</td>
-                <td class="text-gray-500">$$</td>
+                <td><a href="https://arxiv.org/abs/2601.02163" class="text-gray-400 hover:underline">arXiv:2601.02163</a></td>
               </tr>
               <tr>
                 <td>Hindsight</td>
                 <td>89.6%</td>
                 <td>Yes (cloud)</td>
-                <td class="text-gray-500">$$</td>
-              </tr>
-              <tr>
-                <td>Zep</td>
-                <td>~85%</td>
-                <td>Yes (cloud)</td>
-                <td class="text-gray-500">$$</td>
+                <td><a href="https://arxiv.org/abs/2512.12818" class="text-gray-400 hover:underline">arXiv:2512.12818</a></td>
               </tr>
               <tr>
                 <td>Letta / MemGPT</td>
-                <td>~83.2%</td>
+                <td>83.2%</td>
                 <td>Yes (cloud)</td>
-                <td class="text-gray-500">$$</td>
+                <td><a href="https://www.letta.com/blog" class="text-gray-400 hover:underline">Letta blog</a></td>
               </tr>
               <tr>
-                <td>SLM V3 (zero-cloud)</td>
+                <td>SLM V3</td>
                 <td>74.8%</td>
                 <td>No</td>
-                <td>$0</td>
-              </tr>
-              <tr>
-                <td>Supermemory</td>
-                <td>~70%</td>
-                <td>Yes</td>
-                <td class="text-gray-500">$$</td>
-              </tr>
-              <tr>
-                <td>Mem0 (independent)</td>
-                <td>~58%</td>
-                <td>Yes</td>
-                <td class="text-gray-500">$$</td>
+                <td><a href="https://arxiv.org/abs/2603.14588" class="text-gray-400 hover:underline">arXiv:2603.14588</a></td>
               </tr>
             </tbody>
           </table>
