@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "engram-search"
-version = "0.1.4"
+version = "0.1.5"
 description = "High-recall conversational memory retrieval. 98% R@5 on LongMemEval, 94% on LoCoMo — no LLM required. Local-first, cloud-ready."
 readme = "README.md"
 license = "MIT"
