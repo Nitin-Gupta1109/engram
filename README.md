@@ -5,7 +5,7 @@
 <h1 align="center">Engram</h1>
 
 <p align="center">
-  <strong>High-recall memory for AI agents</strong><br/>
+  <strong>High-recall memory for Conversational AI agents</strong><br/>
   93.9% LoCoMo • Zero LLM calls • Local-first, cloud-ready
 </p>
 
