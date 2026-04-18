@@ -65,20 +65,17 @@ Nothing is summarized. Nothing is paraphrased. Your exact words are stored and r
 
 ## How It Compares
 
-### LoCoMo — Zero-LLM Memory Systems
+### LoCoMo — R@5 Leaderboard
 
-| System | LoCoMo Accuracy | LLM Required |
-|--------|----------------|--------------|
-| **Engram** | **93.9%** | **No** |
-| EverMemOS | 92.3% | Yes (cloud) |
-| Hindsight | 89.6% | Yes (cloud) |
-| Zep | ~85% | Yes (cloud) |
-| Letta / MemGPT | ~83.2% | Yes (cloud) |
-| SLM V3 (zero-cloud) | 74.8% | No |
-| Supermemory | ~70% | Yes |
-| Mem0 (independent) | ~58% | Yes |
+| System | LoCoMo R@5 | LLM Required | Source |
+|--------|-----------:|--------------|--------|
+| **Engram** | **93.9%** | **No** | This repo (reproducible) |
+| EverMemOS | 92.3% | Yes (cloud) | [arXiv:2601.02163](https://arxiv.org/abs/2601.02163) |
+| Hindsight | 89.6% | Yes (cloud) | [arXiv:2512.12818](https://arxiv.org/abs/2512.12818) |
+| Letta / MemGPT | 83.2% | Yes (cloud) | [Letta blog](https://www.letta.com/blog) |
+| SLM V3 | 74.8% | No | [arXiv:2603.14588](https://arxiv.org/abs/2603.14588) |
 
-Engram is the **top-performing system** on LoCoMo — beating paid cloud-LLM services at $0/query.
+Engram is the **top-performing system** on LoCoMo — and the only one in the top tier with zero LLM calls at query time.
 
 ### LongMemEval
 
