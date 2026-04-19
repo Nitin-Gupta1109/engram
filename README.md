@@ -211,6 +211,38 @@ uvicorn engram.server:app --host 0.0.0.0 --port 8000
 | `GET` | `/health` | Health check |
 | `GET` | `/stats` | Store statistics |
 
+## Quickstart — MCP Server
+
+Expose Engram as a Model Context Protocol tool for Claude Desktop, Cursor, Windsurf, Zed, and other MCP clients.
+
+```bash
+pip install "engram-search[mcp]"
+engram init ./engram_store   # create a store
+```
+
+Add to `claude_desktop_config.json` (or your MCP client's equivalent):
+
+```json
+{
+  "mcpServers": {
+    "engram": {
+      "command": "engram-mcp",
+      "env": {
+        "ENGRAM_STORE_PATH": "/absolute/path/to/engram_store"
+      }
+    }
+  }
+}
+```
+
+Restart the client. Engram exposes three tools:
+
+| Tool | Description |
+|------|-------------|
+| `search_memory(query, top_k, min_score)` | Retrieve relevant memories |
+| `add_memory(text, metadata)` | Store a new memory fact |
+| `memory_stats()` | Count documents in the store |
+
 ## Use Cases
 
 - **AI assistants with long-term memory** — recall user preferences, past decisions, and prior context across sessions
@@ -292,7 +324,7 @@ python benchmarks/locomo_bench.py data/locomo10.json --mode rerank
 ## Roadmap
 
 - [ ] **LangChain + LlamaIndex integrations** — drop-in memory modules for existing agent stacks
-- [ ] **MCP server** — expose Engram as a Model Context Protocol tool for Claude, Cursor, and other MCP clients
+- [x] **MCP server** — expose Engram as a Model Context Protocol tool for Claude, Cursor, and other MCP clients
 - [ ] **Streaming ingestion** — append turns to a live session without re-indexing
 - [ ] **Multi-tenant isolation** — per-user namespaces for hosted deployments
 - [ ] **Async API** — non-blocking ingest/search for high-throughput workloads

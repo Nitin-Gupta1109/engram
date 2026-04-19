@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "engram-search"
-version = "0.1.5"
+version = "0.1.6"
 description = "High-recall conversational memory retrieval. 98% R@5 on LongMemEval, 94% on LoCoMo — no LLM required. Local-first, cloud-ready."
 readme = "README.md"
 license = "MIT"
@@ -48,8 +48,11 @@ rerank = [
 bench = [
     "tqdm>=4.60",
 ]
+mcp = [
+    "mcp>=1.0",
+]
 dev = [
-    "engram-search[cloud,rerank,bench]",
+    "engram-search[cloud,rerank,bench,mcp]",
     "pytest>=7.0",
     "ruff>=0.4",
 ]
@@ -57,6 +60,7 @@ all = ["engram-search[dev]"]
 
 [project.scripts]
 engram = "engram.cli:main"
+engram-mcp = "engram.mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["engram"]
