@@ -45,22 +45,24 @@ _backend = None
 _embedder = None
 
 
-def _get_backend():
-    global _backend
-    if _backend is None:
-        from .backends.faiss_backend import FaissBackend
-
-        _backend = FaissBackend(path=Path(STORE_PATH).resolve())
-    return _backend
-
-
 def _get_embedder():
     global _embedder
     if _embedder is None:
         from .retrieval.embedder import Embedder
 
         _embedder = Embedder(EMBED_MODEL)
+        _embedder._load()
     return _embedder
+
+
+def _get_backend():
+    global _backend
+    if _backend is None:
+        from .backends.faiss_backend import FaissBackend
+
+        emb = _get_embedder()
+        _backend = FaissBackend(path=Path(STORE_PATH).resolve(), dimension=emb.dimension)
+    return _backend
 
 
 @mcp.tool()
